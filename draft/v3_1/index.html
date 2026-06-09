@@ -1,0 +1,3341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frank Chou | Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Background */
+  --color-background:          #080E1A;
+  --color-background-elevated: #0D1628;
+  --color-background-glass:    rgba(13, 22, 40, 0.72);
+  --color-void:                #080D13;
+  --color-deep:                #0D1520;
+  --color-surface:             #111D2E;
+  --color-panel:               #162032;
+
+  /* Foreground */
+  --color-foreground:          #E8EDF2;
+  --color-foreground-muted:    #7A90B0;
+  --color-foreground-dim:      #3D506E;
+
+  /* B2B Primary - Amber */
+  --color-primary:             #D4920A;
+  --color-primary-dim:         rgba(212, 146, 10, 0.15);
+  --color-primary-foreground:  #080E1A;
+  --color-amber:               #D4940A;
+  --color-amber-glow:          #E8A91E;
+  --color-amber-dim:           #8A6008;
+  --color-amber-trace:         rgba(212, 148, 10, 0.12);
+
+  /* AI Accent - Cyan */
+  --color-accent:              #0EB8D5;
+  --color-accent-dim:          rgba(14, 184, 213, 0.12);
+  --color-accent-glow:         rgba(14, 184, 213, 0.30);
+  --color-cyan:                #00C8D4;
+  --color-cyan-glow:           #20E0EC;
+  --color-cyan-dim:            #008A93;
+  --color-cyan-trace:          rgba(0, 200, 212, 0.10);
+
+  /* Status Colors */
+  --color-status-approaching:  #0EB8D5;
+  --color-status-active:       #22C55E;
+  --color-status-holding:      #D4920A;
+  --color-status-taxiing:      #A080D4;
+  --color-status-on-final:     #F87171;
+
+  /* Container */
+  --color-card:                rgba(13, 22, 40, 0.60);
+  --color-border:              rgba(14, 184, 213, 0.10);
+  --color-border-bright:       rgba(14, 184, 213, 0.30);
+  --color-separator:           rgba(232, 239, 248, 0.06);
+  --color-destructive:         #EF4444;
+  --color-ring:                #0EB8D5;
+
+  /* Shadows */
+  --shadow-panel:              0 0 0 1px var(--color-border);
+  --shadow-elevated:           0 4px 24px rgba(8, 14, 26, 0.60);
+  --shadow-glow-accent:        0 0 16px rgba(14, 184, 213, 0.20);
+  --shadow-glow-primary:       0 0 12px rgba(212, 146, 10, 0.25);
+
+  /* Border Radius */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-pill: 9999px;
+
+  /* Spacing */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow: hidden;
+  min-height: 100dvh;
+  position: relative;
+  /* Deep orbit command deck CSS background fallback */
+  background-image:
+    radial-gradient(ellipse at 20% 80%, rgba(212, 148, 10, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 200, 212, 0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #080D13 0%, #0D1520 100%);
+}
+
+/* ============================================================
+   TOP NAVIGATION (z-index: 40)
+   ============================================================ */
+#atc-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  z-index: 40;
+  background: var(--color-background-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  /* Top scan line animation */
+  overflow: hidden;
+}
+
+#atc-nav::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  animation: nav-scan 5s linear infinite;
+}
+
+@keyframes nav-scan {
+  0%   { left: -30%; }
+  100% { left: 130%; }
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+
+.nav-brand-icon {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Double-ring radar station icon */
+.nav-brand-icon::before,
+.nav-brand-icon::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.nav-brand-icon::before {
+  width: 14px;
+  height: 14px;
+  border: 1px dashed var(--color-accent);
+  opacity: 0.5;
+}
+
+.nav-brand-icon::after {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  opacity: 0.9;
+}
+
+.nav-center {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--color-foreground-muted);
+  text-transform: uppercase;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nav-sys-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--color-foreground-dim);
+  letter-spacing: 0.06em;
+}
+
+.nav-hire-btn {
+  height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  box-shadow: var(--shadow-glow-accent);
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+  white-space: nowrap;
+}
+
+.nav-hire-btn:hover {
+  background: var(--color-accent-dim);
+  box-shadow: 0 0 20px rgba(14, 184, 213, 0.35);
+}
+
+.nav-hire-btn:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Hamburger for mobile */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-top: 48px;
+  padding-bottom: 36px;
+}
+
+#main-columns {
+  display: flex;
+  flex: 1;
+  height: calc(100dvh - 48px - 36px);
+  gap: 4px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   LEFT COLUMN - FLIGHT DISPATCH (288px)
+   ============================================================ */
+#atc-left {
+  width: 288px;
+  flex-shrink: 0;
+  background: var(--color-background-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.col-header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-separator);
+  flex-shrink: 0;
+}
+
+.col-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--color-foreground-dim);
+  text-transform: uppercase;
+}
+
+.dispatch-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dispatch-list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.dispatch-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dispatch-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+.dispatch-item {
+  height: 80px;
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-separator);
+  position: relative;
+  transition: background 150ms ease-out;
+  /* Left indicator line */
+  border-left: 2px solid transparent;
+}
+
+.dispatch-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: transparent;
+  transition: background 150ms ease-out;
+}
+
+.dispatch-item:hover {
+  background: var(--color-accent-dim);
+}
+
+.dispatch-item:hover::before {
+  background: var(--color-accent);
+}
+
+.dispatch-item.active {
+  background: var(--color-primary-dim);
+}
+
+.dispatch-item.active::before {
+  background: var(--color-primary);
+  width: 3px;
+}
+
+.dispatch-item:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: -2px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.approaching { background: var(--color-status-approaching); animation: pulse-cyan 2s ease-in-out infinite; }
+.status-dot.holding     { background: var(--color-status-holding);    animation: pulse-amber 2s ease-in-out infinite; }
+.status-dot.on-final    { background: var(--color-status-on-final);   animation: blink-fast 0.6s ease-in-out infinite; }
+.status-dot.taxiing     { background: var(--color-status-taxiing);    }
+.status-dot.active      { background: var(--color-status-active);     animation: pulse-green 2s ease-in-out infinite; }
+
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--color-status-approaching); }
+  50%       { opacity: 0.4; box-shadow: none; }
+}
+
+@keyframes pulse-amber {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--color-status-holding); }
+  50%       { opacity: 0.5; box-shadow: none; }
+}
+
+@keyframes blink-fast {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.1; }
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--color-status-active); }
+  50%       { opacity: 0.5; box-shadow: none; }
+}
+
+.dispatch-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.dispatch-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dispatch-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dispatch-desc {
+  font-size: 10px;
+  color: var(--color-foreground-muted);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dispatch-tags {
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.tech-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--color-foreground-dim);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+  letter-spacing: 0.04em;
+}
+
+.status-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  padding: 2px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-badge.approaching {
+  background: rgba(14, 184, 213, 0.12);
+  color: var(--color-accent);
+  border: 1px solid rgba(14, 184, 213, 0.25);
+}
+
+.status-badge.holding {
+  background: rgba(212, 146, 10, 0.12);
+  color: var(--color-primary);
+  border: 1px solid rgba(212, 146, 10, 0.25);
+}
+
+.status-badge.on-final {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--color-status-on-final);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.status-badge.taxiing {
+  background: rgba(160, 128, 212, 0.10);
+  color: var(--color-status-taxiing);
+  border: 1px solid rgba(160, 128, 212, 0.20);
+}
+
+.status-badge.active {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--color-status-active);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.dispatch-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* Left col bottom */
+.dispatch-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-separator);
+  flex-shrink: 0;
+}
+
+.sys-health {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--color-status-active);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  letter-spacing: 0.04em;
+}
+
+.sys-health-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-status-active);
+  border-radius: 50%;
+  animation: pulse-green 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   CENTER COLUMN - COMMAND GLOBE
+   ============================================================ */
+#center-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hero text area */
+.hero-area {
+  padding: var(--space-5) var(--space-5) var(--space-3);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.hero-sys-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--color-foreground-dim);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-1);
+  text-transform: uppercase;
+}
+
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.2rem, 2.2vw, 2rem);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--color-foreground);
+  text-align: left;
+  margin-bottom: var(--space-1);
+}
+
+.hero-title-accent {
+  color: var(--color-primary);
+}
+
+.hero-subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  color: var(--color-foreground-muted);
+  font-weight: 400;
+}
+
+/* Flight Queue panel (top-right of globe) */
+.flight-queue-panel {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-3);
+  width: 196px;
+  background: var(--color-background-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  z-index: 20;
+}
+
+.fq-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-foreground-dim);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-separator);
+  padding-bottom: var(--space-1);
+}
+
+.fq-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--color-foreground-muted);
+  cursor: pointer;
+  transition: color 100ms;
+}
+
+.fq-item:hover {
+  color: var(--color-foreground);
+}
+
+.fq-arrow {
+  font-size: 8px;
+  width: 8px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fq-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fq-status {
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+/* Globe container */
+#atc-globe {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+#globe-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Globe overlay info */
+.globe-overlay {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-4);
+  z-index: 5;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(14, 184, 213, 0.3);
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+
+/* Tooltip */
+#flight-tooltip {
+  position: absolute;
+  width: 200px;
+  background: rgba(13, 22, 40, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border-bright);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+#flight-tooltip.visible {
+  opacity: 1;
+}
+
+.tooltip-header {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-foreground);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--color-separator);
+  padding-bottom: var(--space-1);
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-foreground-muted);
+  font-size: 9px;
+}
+
+.tooltip-row span:first-child {
+  color: var(--color-foreground-dim);
+}
+
+/* Static SVG globe fallback (mobile / no-WebGL) */
+#static-globe {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   RIGHT COLUMN - INTEL PANEL (360px)
+   ============================================================ */
+#atc-right {
+  width: 360px;
+  flex-shrink: 0;
+  background: var(--color-background-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-left: 1px solid var(--color-border);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#atc-right::-webkit-scrollbar {
+  width: 3px;
+}
+
+#atc-right::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#atc-right::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+}
+
+/* Default intel content */
+#intel-default {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Product detail drawer overlay on right col */
+#product-drawer {
+  display: none;
+  flex-direction: column;
+}
+
+#product-drawer.visible {
+  display: flex;
+}
+
+#intel-default.hidden {
+  display: none;
+}
+
+/* Section blocks */
+.intel-section {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-separator);
+}
+
+.intel-section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--color-foreground-dim);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+/* B2B KPI */
+.kpi-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.kpi-item {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-separator);
+  cursor: default;
+  transition: background 150ms ease-out;
+  border-left: 1px solid transparent;
+  padding-left: var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+}
+
+.kpi-item:last-child {
+  border-bottom: none;
+}
+
+.kpi-item:hover {
+  background: var(--color-primary-dim);
+}
+
+.kpi-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(1.2rem, 1.8vw, 1.75rem);
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+}
+
+.kpi-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground);
+  margin-top: 1px;
+}
+
+.kpi-source {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--color-foreground-muted);
+  margin-top: 1px;
+}
+
+/* CTA */
+.cta-primary {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  box-shadow: var(--shadow-glow-accent);
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.cta-primary:hover {
+  background: var(--color-accent-dim);
+  box-shadow: 0 0 20px rgba(14, 184, 213, 0.35);
+}
+
+.cta-primary:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.cta-primary:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.cta-secondary {
+  display: block;
+  text-align: center;
+  margin-top: var(--space-2);
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+  text-decoration: underline dotted;
+  opacity: 0.7;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  width: 100%;
+  transition: opacity 150ms;
+}
+
+.cta-secondary:hover {
+  opacity: 1;
+  text-decoration: underline solid;
+}
+
+/* Credentials */
+.credentials-grid {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.credential-card {
+  width: 80px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  transition: transform 150ms ease-out, border-color 150ms, box-shadow 150ms;
+}
+
+.credential-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 146, 10, 0.50);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.credential-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.credential-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--color-foreground);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.credential-org {
+  font-size: 8px;
+  color: var(--color-foreground-muted);
+  text-align: center;
+}
+
+/* Global Network */
+.world-map-container {
+  position: relative;
+  width: 100%;
+}
+
+.world-map-container svg {
+  width: 100%;
+  height: auto;
+}
+
+.map-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  fill: var(--color-foreground-muted);
+}
+
+.map-node {
+  cursor: default;
+}
+
+.map-node circle {
+  animation: pulse-cyan 2s ease-in-out infinite;
+}
+
+/* Tech Stack */
+.tech-stack-svg {
+  width: 100%;
+  overflow: visible;
+}
+
+.tech-node {
+  cursor: default;
+}
+
+.tech-node rect {
+  transition: stroke 150ms;
+}
+
+.tech-node:hover rect {
+  stroke: var(--color-accent);
+}
+
+.tech-node:hover text {
+  fill: var(--color-foreground);
+}
+
+.tech-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+/* Product Drawer */
+.drawer-header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-separator);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.drawer-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-foreground-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 150ms, color 150ms;
+}
+
+.drawer-close:hover {
+  border-color: var(--color-border-bright);
+  color: var(--color-foreground);
+}
+
+.drawer-flight-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--color-foreground-dim);
+  letter-spacing: 0.06em;
+}
+
+.drawer-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-foreground);
+  flex: 1;
+}
+
+.drawer-body {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.drawer-sub {
+  font-size: 12px;
+  color: var(--color-foreground-muted);
+}
+
+.drawer-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-foreground-dim);
+  text-transform: uppercase;
+  margin-bottom: var(--space-1);
+}
+
+.flight-data-block {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.flight-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 2px 0;
+}
+
+.flight-data-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--color-foreground-dim);
+  letter-spacing: 0.06em;
+}
+
+.flight-data-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--color-foreground-muted);
+  text-align: right;
+  max-width: 60%;
+}
+
+.arch-diagram {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--color-foreground-muted);
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+.challenge-block {
+  font-size: 11px;
+  color: var(--color-foreground-muted);
+  line-height: 1.6;
+}
+
+.tech-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.tech-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--color-accent);
+  border: 1px solid rgba(14, 184, 213, 0.25);
+  background: rgba(14, 184, 213, 0.05);
+  border-radius: var(--radius-xs);
+  padding: 2px 7px;
+  letter-spacing: 0.04em;
+}
+
+.drawer-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.drawer-btn-primary {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.drawer-btn-primary:hover {
+  background: var(--color-accent-dim);
+}
+
+.drawer-btn-secondary {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-foreground-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 150ms, color 150ms;
+}
+
+.drawer-btn-secondary:hover {
+  border-color: var(--color-border-bright);
+  color: var(--color-foreground);
+}
+
+/* ============================================================
+   BOTTOM HUD STATUS BAR (z-index: 40, fixed)
+   ============================================================ */
+#atc-hud {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  z-index: 40;
+  background: var(--color-void);
+  border-top: 1px solid rgba(14, 184, 213, 0.10);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hud-ticker-wrap {
+  white-space: nowrap;
+  animation: hud-scroll 35s linear infinite;
+  display: flex;
+  align-items: center;
+}
+
+@keyframes hud-scroll {
+  0%   { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+.hud-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--color-foreground-dim);
+  letter-spacing: 0.06em;
+  padding-right: 80px;
+}
+
+.hud-sep {
+  color: rgba(14, 184, 213, 0.3);
+  margin: 0 var(--space-3);
+}
+
+.hud-accent {
+  color: var(--color-accent);
+  opacity: 0.6;
+}
+
+/* ============================================================
+   FIXED CTA (right-bottom, appears after scroll - always visible on desktop)
+   ============================================================ */
+#fixed-cta {
+  position: fixed;
+  bottom: calc(36px + var(--space-4));
+  right: var(--space-4);
+  width: 240px;
+  background: var(--color-background-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  z-index: 50;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  pointer-events: none;
+}
+
+#fixed-cta.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.fixed-cta-btn {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: var(--shadow-glow-accent);
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.fixed-cta-btn:hover {
+  background: var(--color-accent-dim);
+  box-shadow: 0 0 20px rgba(14, 184, 213, 0.35);
+}
+
+.fixed-cta-secondary {
+  display: block;
+  text-align: center;
+  margin-top: var(--space-1);
+  font-size: 10px;
+  color: var(--color-foreground-muted);
+  text-decoration: underline dotted;
+  opacity: 0.6;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  width: 100%;
+  transition: opacity 150ms;
+}
+
+.fixed-cta-secondary:hover {
+  opacity: 1;
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE (<768px)
+   ============================================================ */
+@media (max-width: 767px) {
+  body {
+    overflow: auto;
+  }
+
+  #app {
+    padding-top: 48px;
+    padding-bottom: 0;
+  }
+
+  #main-columns {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+    gap: 0;
+  }
+
+  #atc-left {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Mobile: left col accordion */
+  .dispatch-list {
+    overflow: hidden;
+  }
+
+  #center-col {
+    min-height: 300px;
+    height: 60dvh;
+  }
+
+  .flight-queue-panel {
+    display: none;
+  }
+
+  .hero-area {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .hero-title {
+    font-size: 1.1rem;
+  }
+
+  #atc-right {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    overflow: visible;
+    height: auto;
+  }
+
+  #atc-hud {
+    position: static;
+    height: auto;
+    padding: var(--space-2) var(--space-4);
+    margin-top: 0;
+  }
+
+  .hud-ticker-wrap {
+    animation: none;
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+
+  .hud-text {
+    font-size: 9px;
+  }
+
+  #fixed-cta {
+    bottom: var(--space-3);
+    right: var(--space-3);
+    width: calc(100% - var(--space-6));
+    left: var(--space-3);
+  }
+
+  .nav-center { display: none; }
+  .nav-hire-btn { display: none; }
+  .nav-hamburger { display: flex; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  #atc-left { width: 240px; }
+  #atc-right { width: 280px; }
+}
+
+/* ============================================================
+   REDUCED MOTION OVERRIDES
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .hud-ticker-wrap {
+    animation: none;
+  }
+
+  #globe-canvas {
+    display: none;
+  }
+
+  #static-globe {
+    display: flex !important;
+  }
+}
+
+/* ============================================================
+   ENTRY ANIMATION (stagger)
+   ============================================================ */
+.animate-in {
+  opacity: 0;
+  transform: translateX(-8px);
+  animation: slide-in 0.4s ease-out forwards;
+}
+
+@keyframes slide-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.dispatch-item:nth-child(1) { animation-delay: 0.1s; }
+.dispatch-item:nth-child(2) { animation-delay: 0.2s; }
+.dispatch-item:nth-child(3) { animation-delay: 0.3s; }
+.dispatch-item:nth-child(4) { animation-delay: 0.4s; }
+.dispatch-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* ILS approach lights */
+.ils-light {
+  animation: ils-sequence 1.2s linear infinite;
+}
+
+@keyframes ils-sequence {
+  0%   { opacity: 0.1; }
+  50%  { opacity: 1.0; }
+  100% { opacity: 0.1; }
+}
+
+/* ============================================================
+   SCENE INDICATOR (P1 Scroll-Driven Scene Switcher)
+   ============================================================ */
+/* Scroll Scene Indicator */
+#scene-indicator {
+  position: fixed;
+  left: calc(288px + 16px); /* 中欄左緣 */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+#scene-indicator .scene-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(14,184,213,0.3);
+  border: 1px solid rgba(14,184,213,0.5);
+  cursor: pointer;
+  transition: all 300ms ease;
+  position: relative;
+}
+#scene-indicator .scene-dot.active {
+  background: #0EB8D5;
+  box-shadow: 0 0 0 4px rgba(14,184,213,0.2);
+  animation: dotBreath 2s ease-in-out infinite;
+}
+@keyframes dotBreath {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(14,184,213,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(14,184,213,0.1); }
+}
+.scene-dot .dot-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #0EB8D5;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 200ms;
+  font-family: monospace;
+  letter-spacing: 0.1em;
+}
+.scene-dot:hover .dot-label { opacity: 1; }
+
+/* ============================================================
+   P2 — 浮動卡片解鎖
+   ============================================================ */
+
+/* Peek Panel */
+#peek-panel {
+  position: absolute;
+  right: -168px;
+  top: 0;
+  width: 160px;
+  height: 160px;
+  background: var(--color-background-elevated, #0D1520);
+  border: 1px solid rgba(14,184,213,0.3);
+  border-radius: 4px;
+  padding: 12px;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 150ms ease, transform 150ms ease;
+  pointer-events: none;
+  z-index: 50;
+  font-size: 11px;
+  color: rgba(14,184,213,0.8);
+  font-family: monospace;
+}
+.dispatch-item:hover #peek-panel,
+.dispatch-item.peek-visible #peek-panel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Dispatch item unlocking state */
+.dispatch-item.unlocking .dispatch-indicator,
+.dispatch-item.unlocking .item-indicator {
+  background: #D4920A !important;
+  box-shadow: 0 0 8px rgba(212,146,10,0.6) !important;
+}
+.dispatch-item.unlocking {
+  pointer-events: none;
+}
+
+/* Scan line effect */
+.scan-line-overlay {
+  position: fixed;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(14,184,213,0.5), transparent);
+  pointer-events: none;
+  z-index: 200;
+  opacity: 0;
+}
+
+/* Glow burst */
+.glow-burst {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(ellipse 300% 100% at center, rgba(14,184,213,0.35) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 199;
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* Right panel unlock animation */
+#atc-right.unlocking {
+  animation: panelUnlock 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes panelUnlock {
+  from { transform: translateX(20px); opacity: 0.5; }
+  to   { transform: translateX(0);    opacity: 1;   }
+}
+
+/* Typewriter cursor */
+.typewriter-text::after {
+  content: '_';
+  animation: blink 0.8s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ============================================================
+   P3 — UI 凍結狀態
+   ============================================================ */
+
+.atc-frozen #atc-left {
+  opacity: 0.65;
+  filter: blur(0.5px);
+  transition: opacity 150ms ease, filter 150ms ease;
+}
+.atc-frozen #atc-right {
+  opacity: 0.5;
+  filter: blur(1px);
+  transition: opacity 150ms ease, filter 150ms ease;
+}
+.atc-unfreezing #atc-left,
+.atc-unfreezing #atc-right {
+  transition: opacity 300ms ease, filter 300ms ease;
+}
+
+/* Sweep indicator during freeze */
+.atc-frozen #atc-left::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(14,184,213,0.08) 0%, transparent 100%);
+  pointer-events: none;
+  animation: sweepLeft 600ms ease-in-out;
+}
+.atc-frozen #atc-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(270deg, rgba(14,184,213,0.08) 0%, transparent 100%);
+  pointer-events: none;
+  animation: sweepRight 600ms ease-in-out;
+}
+@keyframes sweepLeft  { from { opacity: 1; } to { opacity: 0; } }
+@keyframes sweepRight { from { opacity: 1; } to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-line-overlay,
+  .glow-burst,
+  .typewriter-text::after {
+    animation: none !important;
+  }
+  #atc-right.unlocking { animation: none !important; }
+  .atc-frozen #atc-left::after,
+  .atc-frozen #atc-right::after { animation: none !important; opacity: 0; }
+  @keyframes panelUnlock {}
+}
+
+/* ON FINAL alert pulse */
+.status-on-final, [data-status="ON FINAL"], .flight-status.on-final {
+  animation: alertPulse 1s step-end infinite;
+  color: #E4572E !important;
+}
+@keyframes alertPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-on-final, [data-status="ON FINAL"], .flight-status.on-final {
+    animation: none;
+    color: #E4572E !important;
+  }
+}
+
+/* ============================================================
+   MOBILE DEGRADATION (P5)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Three.js canvas hidden on mobile */
+  #atc-globe canvas,
+  #atc-globe .three-canvas {
+    display: none;
+  }
+  #atc-globe {
+    background: radial-gradient(ellipse at center, #0A2540 0%, #080E1A 70%);
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #atc-globe::after {
+    content: '\25CE GLOBE OFFLINE \2014 TACTICAL MODE';
+    font-family: monospace;
+    font-size: 11px;
+    color: rgba(14,184,213,0.4);
+    letter-spacing: 0.15em;
+  }
+
+  /* Three-column → vertical accordion */
+  #app, .app-container, .main-layout, [class*="grid"], [class*="layout"] {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  #atc-left, #atc-globe, #atc-right {
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    flex: unset !important;
+  }
+  #atc-left { order: 1; }
+  #atc-globe { order: 2; }
+  #atc-right { order: 3; }
+
+  /* Right panel → bottom sheet */
+  #atc-right {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    z-index: 300;
+    background: #0D1520;
+    border-top: 1px solid rgba(14,184,213,0.3);
+    transform: translateY(100%);
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 12px 12px 0 0;
+    padding: 16px;
+  }
+  #atc-right.sheet-open {
+    transform: translateY(0);
+  }
+  #atc-right::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: rgba(14,184,213,0.3);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  /* Scene indicator hidden on mobile */
+  #scene-indicator { display: none; }
+
+  /* HUD simplified */
+  #atc-hud {
+    font-size: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Remove all decorative animations, keep functional ones */
+  .scan-line-overlay,
+  .glow-burst,
+  .atc-frozen #atc-left::after,
+  .atc-frozen #atc-right::after {
+    display: none !important;
+  }
+  #atc-right.unlocking {
+    animation: none !important;
+    transform: none !important;
+  }
+  /* Keep drawer slide-in as it's functional */
+  #atc-right {
+    transition: transform 300ms ease !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     GLOBAL NAV
+     ============================================================ -->
+<nav id="atc-nav" role="banner">
+  <div class="nav-brand">
+    <div class="nav-brand-icon" aria-hidden="true"></div>
+    <span>Command Center</span>
+  </div>
+  <div class="nav-center" aria-label="Page title">MY PORTFOLIO</div>
+  <div class="nav-right">
+    <span class="nav-sys-id" aria-label="System ID">F.CHOU.SYS</span>
+    <button class="nav-hire-btn" onclick="document.getElementById('fixed-cta').classList.add('visible')" aria-label="Hire Frank Chou">
+      HIRE ME
+    </button>
+    <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">&#9776;</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     SCENE INDICATOR (P1 Scroll-Driven)
+     ============================================================ -->
+<div id="scene-indicator" aria-hidden="true">
+  <div class="scene-dot active" data-scene="COMMAND"><span class="dot-label">COMMAND</span></div>
+  <div class="scene-dot" data-scene="ENTERPRISE"><span class="dot-label">ENTERPRISE</span></div>
+  <div class="scene-dot" data-scene="TERMINAL"><span class="dot-label">TERMINAL</span></div>
+  <div class="scene-dot" data-scene="CONTACT"><span class="dot-label">CONTACT</span></div>
+</div>
+
+<!-- ============================================================
+     MAIN APP
+     ============================================================ -->
+<div id="app">
+  <div id="main-columns">
+
+    <!-- LEFT COLUMN: FLIGHT DISPATCH -->
+    <aside id="atc-left" aria-label="Flight Dispatch">
+      <div class="col-header">
+        <div class="col-title">Flight Dispatch</div>
+      </div>
+
+      <div class="dispatch-list" role="list">
+
+        <!-- AI Hunter -->
+        <div class="dispatch-item animate-in" role="listitem" tabindex="0"
+             data-product="ai-hunter" onclick="selectProduct('ai-hunter')"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct('ai-hunter')"
+             aria-label="AI Hunter - ON FINAL status">
+          <div class="status-dot on-final" aria-hidden="true"></div>
+          <div class="dispatch-icon" aria-hidden="true">&#128269;</div>
+          <div class="dispatch-info">
+            <div class="dispatch-name">AI Hunter</div>
+            <div class="dispatch-desc">Job-seeker AI Agent</div>
+            <div class="dispatch-tags">
+              <span class="tech-tag">LLM</span>
+              <span class="tech-tag">RAG</span>
+            </div>
+          </div>
+          <div class="dispatch-right">
+            <div class="status-badge on-final" aria-label="Status: ON FINAL">
+              <div class="status-dot on-final" style="width:5px;height:5px;flex-shrink:0" aria-hidden="true"></div>
+              ON FINAL
+            </div>
+          </div>
+        </div>
+
+        <!-- XunWu (Lost Item Finder) -->
+        <div class="dispatch-item animate-in" role="listitem" tabindex="0"
+             data-product="xunwu" onclick="selectProduct('xunwu')"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct('xunwu')"
+             aria-label="XunWu Finder - HOLDING status">
+          <div class="status-dot holding" aria-hidden="true"></div>
+          <div class="dispatch-icon" aria-hidden="true">&#128204;</div>
+          <div class="dispatch-info">
+            <div class="dispatch-name">&#23607;&#29289;&#23567;&#31934;&#38714;</div>
+            <div class="dispatch-desc">Home Item Manager</div>
+            <div class="dispatch-tags">
+              <span class="tech-tag">Firebase</span>
+              <span class="tech-tag">AI</span>
+            </div>
+          </div>
+          <div class="dispatch-right">
+            <div class="status-badge holding" aria-label="Status: HOLDING">
+              <div class="status-dot holding" style="width:5px;height:5px;flex-shrink:0" aria-hidden="true"></div>
+              HOLDING
+            </div>
+          </div>
+        </div>
+
+        <!-- DailyLumos -->
+        <div class="dispatch-item animate-in" role="listitem" tabindex="0"
+             data-product="dailylumos" onclick="selectProduct('dailylumos')"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct('dailylumos')"
+             aria-label="DailyLumos - TERMINAL 1 status">
+          <div class="status-dot active" aria-hidden="true"></div>
+          <div class="dispatch-icon" aria-hidden="true">&#128161;</div>
+          <div class="dispatch-info">
+            <div class="dispatch-name">DailyLumos</div>
+            <div class="dispatch-desc">Daily Wisdom AI App</div>
+            <div class="dispatch-tags">
+              <span class="tech-tag">VectorDB</span>
+              <span class="tech-tag">NLP</span>
+            </div>
+          </div>
+          <div class="dispatch-right">
+            <div class="status-badge active" aria-label="Status: TERMINAL 1">
+              <div class="status-dot active" style="width:5px;height:5px;flex-shrink:0" aria-hidden="true"></div>
+              TERMINAL 1
+            </div>
+          </div>
+        </div>
+
+        <!-- VocalCanvas -->
+        <div class="dispatch-item animate-in" role="listitem" tabindex="0"
+             data-product="vocalcanvas" onclick="selectProduct('vocalcanvas')"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct('vocalcanvas')"
+             aria-label="VocalCanvas - INBOUND status">
+          <div class="status-dot approaching" aria-hidden="true"></div>
+          <div class="dispatch-icon" aria-hidden="true">&#127908;</div>
+          <div class="dispatch-info">
+            <div class="dispatch-name">VocalCanvas</div>
+            <div class="dispatch-desc">AI Text-to-Voice Tool</div>
+            <div class="dispatch-tags">
+              <span class="tech-tag">TTS API</span>
+              <span class="tech-tag">Audio</span>
+            </div>
+          </div>
+          <div class="dispatch-right">
+            <div class="status-badge approaching" aria-label="Status: INBOUND">
+              <div class="status-dot approaching" style="width:5px;height:5px;flex-shrink:0" aria-hidden="true"></div>
+              INBOUND
+            </div>
+          </div>
+        </div>
+
+        <!-- WuMin PetHealth -->
+        <div class="dispatch-item animate-in" role="listitem" tabindex="0"
+             data-product="wumin" onclick="selectProduct('wumin')"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct('wumin')"
+             aria-label="WuMin Pet Health - ACTIVE status">
+          <div class="status-dot active" aria-hidden="true"></div>
+          <div class="dispatch-icon" aria-hidden="true">&#128054;</div>
+          <div class="dispatch-info">
+            <div class="dispatch-name">&#28961;&#25935;&#27611;&#23401;</div>
+            <div class="dispatch-desc">Pet Health AI Advisor</div>
+            <div class="dispatch-tags">
+              <span class="tech-tag">Vision AI</span>
+              <span class="tech-tag">DB</span>
+            </div>
+          </div>
+          <div class="dispatch-right">
+            <div class="status-badge active" aria-label="Status: ACTIVE">
+              <div class="status-dot active" style="width:5px;height:5px;flex-shrink:0" aria-hidden="true"></div>
+              ACTIVE
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.dispatch-list -->
+
+      <div class="dispatch-footer">
+        <div class="sys-health">
+          <div class="sys-health-dot" aria-hidden="true"></div>
+          SYS HEALTH: NOMINAL
+        </div>
+      </div>
+    </aside><!-- /#atc-left -->
+
+    <!-- CENTER COLUMN: COMMAND GLOBE -->
+    <main id="center-col" aria-label="Command Globe">
+
+      <!-- Hero text -->
+      <div class="hero-area">
+        <div class="hero-sys-id">SYS-ID: 00447-B &nbsp;|&nbsp; TWN/TAIPEI APPROACH</div>
+        <h1 class="hero-title">
+          MANAGING CHAOS,<br>
+          <span class="hero-title-accent">GUIDING INNOVATION.</span>
+        </h1>
+        <p class="hero-subtitle">Frank Chou &mdash; AI SaaS Builder x Enterprise PM &middot; 7Y Experience</p>
+      </div>
+
+      <!-- Flight Queue HUD panel -->
+      <div class="flight-queue-panel" aria-label="Flight Queue">
+        <div class="fq-title">FLIGHT QUEUE</div>
+        <div class="fq-item" onclick="selectProduct('ai-hunter')" tabindex="0"
+             onkeydown="if(event.key==='Enter')selectProduct('ai-hunter')">
+          <span class="fq-arrow" style="color:var(--color-status-on-final)">&#8681;</span>
+          <span class="fq-name">FLT-01 AI Hunter</span>
+          <span class="fq-status" style="color:var(--color-status-on-final)">ON FINAL</span>
+        </div>
+        <div class="fq-item" onclick="selectProduct('xunwu')" tabindex="0"
+             onkeydown="if(event.key==='Enter')selectProduct('xunwu')">
+          <span class="fq-arrow" style="color:var(--color-status-holding)">&#9711;</span>
+          <span class="fq-name">FLT-02 &#23607;&#29289;&#23567;&#31934;&#38714;</span>
+          <span class="fq-status" style="color:var(--color-status-holding)">HOLDING</span>
+        </div>
+        <div class="fq-item" onclick="selectProduct('dailylumos')" tabindex="0"
+             onkeydown="if(event.key==='Enter')selectProduct('dailylumos')">
+          <span class="fq-arrow" style="color:var(--color-status-active)">&#9632;</span>
+          <span class="fq-name">FLT-03 DailyLumos</span>
+          <span class="fq-status" style="color:var(--color-status-active)">TERMINAL 1</span>
+        </div>
+        <div class="fq-item" onclick="selectProduct('vocalcanvas')" tabindex="0"
+             onkeydown="if(event.key==='Enter')selectProduct('vocalcanvas')">
+          <span class="fq-arrow" style="color:var(--color-status-approaching)">&#8681;</span>
+          <span class="fq-name">FLT-04 VocalCanvas</span>
+          <span class="fq-status" style="color:var(--color-status-approaching)">INBOUND</span>
+        </div>
+        <div class="fq-item" onclick="selectProduct('wumin')" tabindex="0"
+             onkeydown="if(event.key==='Enter')selectProduct('wumin')">
+          <span class="fq-arrow" style="color:var(--color-status-active)">&#9632;</span>
+          <span class="fq-name">FLT-05 &#28961;&#25935;&#27611;&#23401;</span>
+          <span class="fq-status" style="color:var(--color-status-active)">ACTIVE</span>
+        </div>
+      </div>
+
+      <!-- Three.js Globe -->
+      <div id="atc-globe">
+        <canvas id="globe-canvas" aria-label="Interactive 3D Earth Globe showing AI product flight paths"></canvas>
+
+        <!-- Static SVG fallback (mobile / no-WebGL / reduced-motion) -->
+        <div id="static-globe" aria-label="Static Globe Diagram">
+          <svg viewBox="0 0 400 400" width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+            <!-- Stars -->
+            <circle cx="40" cy="30" r="1" fill="#E8EDF2" opacity="0.4"/>
+            <circle cx="360" cy="60" r="1" fill="#E8EDF2" opacity="0.3"/>
+            <circle cx="20" cy="200" r="1.5" fill="#E8EDF2" opacity="0.5"/>
+            <circle cx="380" cy="300" r="1" fill="#E8EDF2" opacity="0.4"/>
+            <circle cx="100" cy="370" r="1" fill="#E8EDF2" opacity="0.3"/>
+            <circle cx="300" cy="20" r="1.5" fill="#E8EDF2" opacity="0.5"/>
+            <!-- Atmosphere glow -->
+            <circle cx="200" cy="200" r="145" fill="none" stroke="rgba(14,184,213,0.15)" stroke-width="12"/>
+            <!-- Earth body -->
+            <circle cx="200" cy="200" r="130" fill="#0a1628"/>
+            <!-- Grid lines -->
+            <circle cx="200" cy="200" r="130" fill="none" stroke="rgba(14,184,213,0.06)" stroke-width="1"/>
+            <circle cx="200" cy="200" r="90" fill="none" stroke="rgba(14,184,213,0.04)" stroke-width="1"/>
+            <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(14,184,213,0.04)" stroke-width="1"/>
+            <line x1="70" y1="200" x2="330" y2="200" stroke="rgba(14,184,213,0.06)" stroke-width="1"/>
+            <line x1="200" y1="70" x2="200" y2="330" stroke="rgba(14,184,213,0.06)" stroke-width="1"/>
+            <line x1="108" y1="108" x2="292" y2="292" stroke="rgba(14,184,213,0.04)" stroke-width="1"/>
+            <line x1="292" y1="108" x2="108" y2="292" stroke="rgba(14,184,213,0.04)" stroke-width="1"/>
+            <!-- Flight arcs (CSS animated) -->
+            <!-- Arc 1: Taiwan to North America -->
+            <path d="M 215 175 Q 280 100 310 140" fill="none" stroke="#0EB8D5" stroke-width="1.5" opacity="0.7"
+                  stroke-dasharray="80" stroke-dashoffset="80">
+              <animate attributeName="stroke-dashoffset" values="80;0;80" dur="6s" repeatCount="indefinite"/>
+            </path>
+            <!-- Arc 2: Taiwan to Europe -->
+            <path d="M 215 175 Q 200 80 155 130" fill="none" stroke="#D4920A" stroke-width="1" opacity="0.6"
+                  stroke-dasharray="70" stroke-dashoffset="70">
+              <animate attributeName="stroke-dashoffset" values="70;0;70" dur="8s" begin="1s" repeatCount="indefinite"/>
+            </path>
+            <!-- Arc 3: Taiwan to SE Asia -->
+            <path d="M 215 175 Q 230 230 210 250" fill="none" stroke="#22C55E" stroke-width="1" opacity="0.6"
+                  stroke-dasharray="50" stroke-dashoffset="50">
+              <animate attributeName="stroke-dashoffset" values="50;0;50" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+            </path>
+            <!-- Arc 4: Taiwan orbit -->
+            <path d="M 215 175 Q 260 140 240 200" fill="none" stroke="#A080D4" stroke-width="1" opacity="0.5"
+                  stroke-dasharray="60" stroke-dashoffset="60">
+              <animate attributeName="stroke-dashoffset" values="60;0;60" dur="10s" begin="2s" repeatCount="indefinite"/>
+            </path>
+            <!-- Taiwan base dot -->
+            <circle cx="215" cy="175" r="4" fill="#0EB8D5" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <!-- TWN label -->
+            <text x="220" y="168" font-family="JetBrains Mono" font-size="8" fill="#0EB8D5" opacity="0.7">TWN</text>
+          </svg>
+        </div>
+
+        <!-- Globe overlay info -->
+        <div class="globe-overlay" aria-hidden="true">
+          <div id="health-overlay">SYSTEM HEALTH: OPTIMAL</div>
+          <div>CONNECTED NODES: <span id="nodes-count">125</span></div>
+        </div>
+      </div>
+
+      <!-- Tooltip -->
+      <div id="flight-tooltip" role="tooltip" aria-live="polite">
+        <div class="tooltip-header" id="tooltip-header">FLT-01 AI Hunter</div>
+        <div class="tooltip-row"><span>STS</span><span id="tt-sts">ON FINAL</span></div>
+        <div class="tooltip-row"><span>ALT</span><span id="tt-alt">FL021 (v2.1)</span></div>
+        <div class="tooltip-row"><span>PAX</span><span id="tt-pax">127 active</span></div>
+        <div class="tooltip-row"><span>ETA</span><span id="tt-eta">Q3 2026</span></div>
+        <div class="tooltip-row"><span>TCKS</span><span id="tt-tech">LLM · RAG</span></div>
+      </div>
+
+    </main><!-- /#center-col -->
+
+    <!-- RIGHT COLUMN: INTEL PANEL -->
+    <aside id="atc-right" aria-label="Intel Panel">
+
+      <!-- Default intel view -->
+      <div id="intel-default">
+
+        <!-- B2B Mission Record -->
+        <div class="intel-section">
+          <div class="section-title">B2B Mission Record</div>
+          <div class="kpi-grid">
+
+            <div class="kpi-item" data-kpi="-97" data-suffix="%" data-label="Time Cost Reduction" data-source="Enterprise Space System - Wistron">
+              <div class="kpi-number" data-count="-97" data-prefix="" data-sfx="%">-97%</div>
+              <div class="kpi-label">Time Cost Reduction</div>
+              <div class="kpi-source">Enterprise Space Mgmt &middot; Wistron</div>
+            </div>
+
+            <div class="kpi-item" data-kpi="+60" data-suffix="%" data-label="Cross-team Efficiency" data-source="SAP Data Exchange - FreshExpress">
+              <div class="kpi-number" data-count="60" data-prefix="+" data-sfx="%">+60%</div>
+              <div class="kpi-label">Cross-team Efficiency</div>
+              <div class="kpi-source">SAP Data Exchange &middot; FreshExpress</div>
+            </div>
+
+            <div class="kpi-item" data-kpi="100" data-suffix="%" data-label="Data Accuracy" data-source="Cross-border WMS - Wistron">
+              <div class="kpi-number" data-count="100" data-prefix="" data-sfx="%">100%</div>
+              <div class="kpi-label">Data Accuracy</div>
+              <div class="kpi-source">Cross-border WMS &middot; Wistron</div>
+            </div>
+
+            <div class="kpi-item" data-kpi="2" data-suffix=" NATIONS" data-label="5 DEPTS" data-source="Govt EIP + WMS + AI Systems">
+              <div class="kpi-number" data-count="2" data-prefix="" data-sfx=" NATIONS">2 NATIONS</div>
+              <div class="kpi-label">5 Departments Served</div>
+              <div class="kpi-source">Govt EIP + WMS + AI Decision</div>
+            </div>
+
+          </div>
+
+          <button class="cta-primary" onclick="openConsultation()" aria-label="Request Consultation">
+            <span>&#9654;</span> REQUEST CONSULTATION
+          </button>
+          <button class="cta-secondary" onclick="downloadResume()" aria-label="Download PDF Resume">
+            Download PDF Resume
+          </button>
+        </div>
+
+        <!-- Command Credentials -->
+        <div class="intel-section">
+          <div class="section-title">Command Credentials</div>
+          <div class="credentials-grid">
+            <div class="credential-card" tabindex="0" title="PMP - Project Management Professional">
+              <div class="credential-icon" aria-hidden="true">&#127941;</div>
+              <div class="credential-name">PMP</div>
+              <div class="credential-org">PMI</div>
+            </div>
+            <div class="credential-card" tabindex="0" title="Atos Outstanding Employee Award">
+              <div class="credential-icon" aria-hidden="true">&#11088;</div>
+              <div class="credential-name">Outstanding</div>
+              <div class="credential-org">Atos</div>
+            </div>
+            <div class="credential-card" tabindex="0" title="Wistron Hackathon 3rd Place">
+              <div class="credential-icon" aria-hidden="true">&#129352;</div>
+              <div class="credential-name">Hackathon</div>
+              <div class="credential-org">Wistron 3rd</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Global Network -->
+        <div class="intel-section">
+          <div class="section-title">Global Network</div>
+          <div class="world-map-container">
+            <svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" aria-label="Global Network Map">
+              <!-- Simplified world outline -->
+              <rect width="320" height="160" fill="rgba(13,22,40,0.4)" rx="4"/>
+              <!-- North America rough -->
+              <path d="M 40 40 L 80 35 L 90 50 L 85 70 L 70 80 L 50 75 L 35 60 Z"
+                    fill="rgba(14,184,213,0.08)" stroke="rgba(14,184,213,0.15)" stroke-width="0.5"/>
+              <!-- Europe rough -->
+              <path d="M 145 35 L 170 30 L 175 45 L 165 55 L 148 52 Z"
+                    fill="rgba(14,184,213,0.08)" stroke="rgba(14,184,213,0.15)" stroke-width="0.5"/>
+              <!-- Asia rough -->
+              <path d="M 190 30 L 260 25 L 270 55 L 255 70 L 230 75 L 200 65 L 185 50 Z"
+                    fill="rgba(14,184,213,0.08)" stroke="rgba(14,184,213,0.15)" stroke-width="0.5"/>
+              <!-- Africa rough -->
+              <path d="M 155 65 L 175 60 L 180 100 L 165 110 L 150 95 Z"
+                    fill="rgba(14,184,213,0.06)" stroke="rgba(14,184,213,0.10)" stroke-width="0.5"/>
+              <!-- Connection lines -->
+              <!-- Taiwan to Atos (Europe) -->
+              <path d="M 238 55 Q 200 20 162 42" fill="none" stroke="rgba(14,184,213,0.3)" stroke-width="1"
+                    stroke-dasharray="4 3"/>
+              <!-- Taiwan to SAP Global -->
+              <path d="M 238 55 Q 260 30 290 60" fill="none" stroke="rgba(212,146,10,0.25)" stroke-width="1"
+                    stroke-dasharray="4 3"/>
+              <!-- Nodes -->
+              <g class="map-node" aria-label="Taiwan Base">
+                <circle cx="238" cy="55" r="4" fill="rgba(14,184,213,0.2)" stroke="#0EB8D5" stroke-width="1.5"/>
+                <circle cx="238" cy="55" r="2" fill="#0EB8D5"/>
+                <text x="242" y="52" class="map-label">TWN BASE</text>
+              </g>
+              <g class="map-node" aria-label="Atos Projects">
+                <circle cx="162" cy="42" r="3" fill="rgba(212,146,10,0.2)" stroke="#D4920A" stroke-width="1"/>
+                <circle cx="162" cy="42" r="1.5" fill="#D4920A"/>
+                <text x="130" y="38" class="map-label" fill="#D4920A" opacity="0.7">Atos</text>
+              </g>
+              <g class="map-node" aria-label="SAP Global">
+                <circle cx="295" cy="62" r="3" fill="rgba(34,197,94,0.2)" stroke="#22C55E" stroke-width="1"/>
+                <circle cx="295" cy="62" r="1.5" fill="#22C55E"/>
+                <text x="282" y="58" class="map-label" fill="#22C55E" opacity="0.7">SAP</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Core Tech Stack -->
+        <div class="intel-section">
+          <div class="section-title">Core Tech Stack</div>
+          <svg class="tech-stack-svg" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg"
+               aria-label="Core Technology Stack Diagram">
+            <!-- Connection lines -->
+            <line x1="58" y1="25" x2="100" y2="25" class="tech-line"/>
+            <line x1="148" y1="25" x2="190" y2="25" class="tech-line"/>
+            <line x1="238" y1="25" x2="280" y2="25" class="tech-line"/>
+            <line x1="58" y1="80" x2="100" y2="80" class="tech-line"/>
+            <line x1="148" y1="80" x2="190" y2="80" class="tech-line"/>
+            <line x1="238" y1="80" x2="280" y2="80" class="tech-line"/>
+            <!-- Vertical connections -->
+            <line x1="35" y1="40" x2="35" y2="65" class="tech-line"/>
+            <line x1="125" y1="40" x2="125" y2="65" class="tech-line"/>
+            <line x1="215" y1="40" x2="215" y2="65" class="tech-line"/>
+            <line x1="300" y1="40" x2="300" y2="65" class="tech-line"/>
+            <!-- Tech nodes row 1 -->
+            <g class="tech-node" tabindex="0" role="img" aria-label="JavaScript">
+              <rect x="5" y="10" width="50" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="30" y="28" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="10" fill="#7A90B0">JS</text>
+            </g>
+            <g class="tech-node" tabindex="0" role="img" aria-label="React">
+              <rect x="100" y="10" width="50" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="125" y="28" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="10" fill="#7A90B0">React</text>
+            </g>
+            <g class="tech-node" tabindex="0" role="img" aria-label="PHP">
+              <rect x="190" y="10" width="50" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="215" y="28" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="10" fill="#7A90B0">PHP</text>
+            </g>
+            <g class="tech-node" tabindex="0" role="img" aria-label="SQL">
+              <rect x="278" y="10" width="42" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="299" y="28" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="10" fill="#7A90B0">SQL</text>
+            </g>
+            <!-- Tech nodes row 2 -->
+            <g class="tech-node" tabindex="0" role="img" aria-label="PowerApps">
+              <rect x="5" y="65" width="60" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="35" y="83" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="9" fill="#7A90B0">Power</text>
+            </g>
+            <g class="tech-node" tabindex="0" role="img" aria-label="ABAP">
+              <rect x="100" y="65" width="50" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="125" y="83" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="10" fill="#7A90B0">ABAP</text>
+            </g>
+            <g class="tech-node" tabindex="0" role="img" aria-label="Firebase">
+              <rect x="190" y="65" width="60" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="220" y="83" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="9" fill="#7A90B0">Firebase</text>
+            </g>
+            <g class="tech-node" tabindex="0" role="img" aria-label="Git">
+              <rect x="278" y="65" width="42" height="28" rx="4" fill="rgba(13,22,40,0.8)"
+                    stroke="rgba(14,184,213,0.12)" stroke-width="1"/>
+              <text x="299" y="83" text-anchor="middle" font-family="JetBrains Mono"
+                    font-size="10" fill="#7A90B0">Git</text>
+            </g>
+          </svg>
+        </div>
+
+      </div><!-- /#intel-default -->
+
+      <!-- Product Drawer (right col) -->
+      <div id="product-drawer">
+        <div class="drawer-header">
+          <button class="drawer-close" onclick="closeProductDrawer()" aria-label="Close product detail">&#10005;</button>
+          <div>
+            <div class="drawer-flight-id" id="drawer-flight-id">FLT-01</div>
+            <div class="drawer-title" id="drawer-title">AI Hunter</div>
+          </div>
+          <div id="drawer-badge"></div>
+        </div>
+        <div class="drawer-body">
+          <p class="drawer-sub" id="drawer-sub">Job-seeker AI Agent powered by LLM + RAG</p>
+
+          <div>
+            <div class="drawer-section-label">Tech Architecture</div>
+            <div class="arch-diagram" id="drawer-arch">
+              User Input -&gt; LLM Orchestration<br>
+              -&gt; RAG Engine -&gt; Vector DB<br>
+              -&gt; Recommendation Output
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-label">Flight Data</div>
+            <div class="flight-data-block" id="drawer-flight-data">
+              <div class="flight-data-row">
+                <span class="flight-data-key">STS:</span>
+                <span class="flight-data-val" id="fd-sts">ON FINAL</span>
+              </div>
+              <div class="flight-data-row">
+                <span class="flight-data-key">ALT:</span>
+                <span class="flight-data-val" id="fd-alt">FL021 (v2.1)</span>
+              </div>
+              <div class="flight-data-row">
+                <span class="flight-data-key">PAX:</span>
+                <span class="flight-data-val" id="fd-pax">127 active</span>
+              </div>
+              <div class="flight-data-row">
+                <span class="flight-data-key">ETA:</span>
+                <span class="flight-data-val" id="fd-eta">Q3 2026</span>
+              </div>
+              <div class="flight-data-row">
+                <span class="flight-data-key">ORIG:</span>
+                <span class="flight-data-val">TW &middot; DEST: GLOBAL</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-label">Tech Stack</div>
+            <div class="tech-pills" id="drawer-tech-pills">
+              <span class="tech-pill">LLM</span>
+              <span class="tech-pill">RAG</span>
+              <span class="tech-pill">Embeddings</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-label">Core Challenge</div>
+            <p class="challenge-block" id="drawer-challenge">
+              Cross-referencing astrological profile data with JD requirements via high-dimensional vector analysis for precise candidate matching.
+            </p>
+          </div>
+
+          <div class="drawer-actions">
+            <button class="drawer-btn-primary" onclick="openConsultation()" aria-label="Request consultation about this product">REQUEST INFO</button>
+            <button class="drawer-btn-secondary" onclick="closeProductDrawer()" aria-label="Back to Intel Panel">&#8592; BACK</button>
+          </div>
+        </div>
+      </div><!-- /#product-drawer -->
+
+    </aside><!-- /#atc-right -->
+
+  </div><!-- /#main-columns -->
+</div><!-- /#app -->
+
+<!-- BOTTOM HUD -->
+<footer id="atc-hud" role="contentinfo" aria-label="System Status">
+  <div class="hud-ticker-wrap" aria-live="off" aria-atomic="false">
+    <span class="hud-text">
+      <span class="hud-accent">[ATIS INFO VICTOR]</span>
+      <span class="hud-sep">|</span>
+      FRANK CHOU
+      <span class="hud-sep">|</span>
+      FL070
+      <span class="hud-sep">|</span>
+      7YRS EXPERIENCE
+      <span class="hud-sep">|</span>
+      5 AI SAAS DEPLOYED
+      <span class="hud-sep">|</span>
+      PMP CERTIFIED
+      <span class="hud-sep">|</span>
+      WIND 360/15KT
+      <span class="hud-sep">|</span>
+      VIS 9999
+      <span class="hud-sep">|</span>
+      SURFACE: OPTIMAL
+      <span class="hud-sep">|</span>
+      <span id="hud-nodes">CONNECTED NODES: 125</span>
+      <span class="hud-sep">|</span>
+      UPTIME: 7Y
+      <span class="hud-sep">|</span>
+      FLIGHT QUEUE: 5
+      <span class="hud-sep">|</span>
+      MISSIONS COMPLETED: 3
+      <span class="hud-sep">|</span>
+      <span class="hud-accent">&#9646;</span>
+    </span>
+  </div>
+</footer>
+
+<!-- FIXED CTA -->
+<div id="fixed-cta" role="complementary" aria-label="Contact CTA">
+  <button class="fixed-cta-btn" onclick="openConsultation()" aria-label="Request 15 minute architecture consultation">
+    <span aria-hidden="true">&#9654;</span> REQUEST CONSULTATION
+  </button>
+  <button class="fixed-cta-secondary" onclick="downloadResume()" aria-label="Download PDF resume">
+    Download PDF Resume
+  </button>
+</div>
+
+<!-- ============================================================
+     THREE.JS CDN
+     ============================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
+<script>
+/* ============================================================
+   PRODUCT DATA
+   ============================================================ */
+const PRODUCTS = {
+  'ai-hunter': {
+    flightId:  'FLT-01',
+    name:      'AI Hunter',
+    sub:       'Job-seeker AI Agent powered by LLM + RAG pipeline',
+    status:    'ON FINAL',
+    statusCls: 'on-final',
+    alt:       'FL021 (v2.1)',
+    pax:       '127 active',
+    eta:       'Q3 2026',
+    tech:      ['LLM', 'RAG', 'Embeddings', 'TTS'],
+    arch:      'User Input -> LLM Orchestration\n-> RAG Engine -> Vector DB\n-> Recommendation Output',
+    challenge: 'Cross-referencing astrological profile data with JD requirements via high-dimensional vector analysis.',
+    /* lat/lon for globe destination */
+    lat: 35.0, lon: -100.0,   /* North America */
+    color: 0xF87171,
+    arcH: 0.8,
+  },
+  'xunwu': {
+    flightId:  'FLT-02',
+    name:      '\u5c0b\u7269\u5c0f\u7cbe\u9748',
+    sub:       'Smart home item tracking system for families',
+    status:    'HOLDING',
+    statusCls: 'holding',
+    alt:       'FL015 (v1.3)',
+    pax:       '48 families',
+    eta:       'Q4 2026',
+    tech:      ['Firebase', 'AI Vision', 'React Native'],
+    arch:      'Photo Input -> AI Object Detect\n-> Firebase RTDB\n-> Family Sharing Layer',
+    challenge: 'Real-time multi-device sync with offline-first architecture across diverse home environments.',
+    lat: 51.5, lon: 0.0,      /* Europe - holding orbit */
+    color: 0xD4920A,
+    arcH: 1.0,
+  },
+  'dailylumos': {
+    flightId:  'FLT-03',
+    name:      'DailyLumos',
+    sub:       'Daily wisdom AI app with NLP analysis',
+    status:    'TERMINAL 1',
+    statusCls: 'active',
+    alt:       'FL030 (v3.0)',
+    pax:       '312 users',
+    eta:       'DEPLOYED',
+    tech:      ['Vector DB', 'NLP', 'LLM', 'Cron'],
+    arch:      'Daily Trigger -> LLM Composition\n-> Vector Store Retrieval\n-> Personalized Delivery',
+    challenge: 'Maintaining wisdom contextual relevance across diverse philosophical traditions and user profiles.',
+    lat: 22.5, lon: 88.0,     /* India/SE Asia */
+    color: 0x22C55E,
+    arcH: 0.5,
+  },
+  'vocalcanvas': {
+    flightId:  'FLT-04',
+    name:      'VocalCanvas',
+    sub:       'AI text-to-speech creative audio tool',
+    status:    'INBOUND',
+    statusCls: 'approaching',
+    alt:       'FL008 (v0.9)',
+    pax:       '63 creators',
+    eta:       'Q2 2026',
+    tech:      ['TTS API', 'Audio Processing', 'React'],
+    arch:      'Text Input -> Voice Style Select\n-> TTS Engine -> Audio Mixer\n-> Export / Share',
+    challenge: 'Balancing natural prosody with creative control, enabling non-technical users to produce broadcast-quality audio.',
+    lat: 48.8, lon: 2.3,      /* France/Europe */
+    color: 0x0EB8D5,
+    arcH: 0.6,
+  },
+  'wumin': {
+    flightId:  'FLT-05',
+    name:      '\u7121\u6575\u6bdb\u5b69',
+    sub:       'Pet health AI recommendation engine',
+    status:    'ACTIVE',
+    statusCls: 'active',
+    alt:       'FL000 (v1.1)',
+    pax:       '89 pet owners',
+    eta:       'DEPLOYED',
+    tech:      ['Vision AI', 'PostgreSQL', 'Nutrition DB'],
+    arch:      'Pet Photo -> Vision AI Analysis\n-> Nutrition DB Cross-ref\n-> Health Recommendation',
+    challenge: 'Building a comprehensive pet food ingredient database with allergen cross-referencing across 2000+ SKUs.',
+    lat: -33.8, lon: 151.0,   /* Australia */
+    color: 0x22C55E,
+    arcH: 0.3,
+  }
+};
+
+/* Taiwan base coordinates */
+const TW_LAT = 23.5;
+const TW_LON = 121.0;
+
+/* ============================================================
+   WEBGL DETECTION & RENDER MODE
+   ============================================================ */
+function detectWebGL() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(c.getContext('webgl') || c.getContext('experimental-webgl'));
+  } catch(e) {
+    return false;
+  }
+}
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = window.innerWidth < 768;
+const hasWebGL = detectWebGL();
+const renderMode = (reducedMotion || !hasWebGL) ? 'static' : (isMobile ? 'lite' : 'full');
+
+/* ============================================================
+   THREE.JS GLOBE
+   ============================================================ */
+let scene, camera, renderer, globe, atmosphereMesh, gridMesh, stars;
+let arcs = {};           /* productId -> {tube, line, material} */
+let planeSprites = {};   /* productId -> THREE.Sprite */
+let planeProgress = {};  /* productId -> t (0-1) */
+let planeSpeeds = {};    /* productId -> speed */
+let raycaster, mouse;
+let isDragging = false;
+let previousMousePos = { x: 0, y: 0 };
+let autoRotate = true;
+let animFrameId = null;
+let clock;
+let selectedProduct = null;
+
+/* Convert lat/lon to 3D vector on sphere of given radius */
+function latLonToVec3(lat, lon, r) {
+  const phi   = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+  return new THREE.Vector3(
+    -r * Math.sin(phi) * Math.cos(theta),
+     r * Math.cos(phi),
+     r * Math.sin(phi) * Math.sin(theta)
+  );
+}
+
+/* Create plane sprite texture via canvas */
+function createPlaneTexture(color) {
+  const size = 64;
+  const cv = document.createElement('canvas');
+  cv.width = size; cv.height = size;
+  const ctx = cv.getContext('2d');
+  const hex = '#' + color.toString(16).padStart(6, '0');
+  ctx.strokeStyle = hex;
+  ctx.fillStyle = hex;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.9;
+  /* Plane silhouette (top-down) */
+  ctx.beginPath();
+  ctx.moveTo(32, 8);
+  ctx.lineTo(36, 26);
+  ctx.lineTo(56, 38);
+  ctx.lineTo(56, 44);
+  ctx.lineTo(36, 36);
+  ctx.lineTo(40, 50);
+  ctx.lineTo(46, 54);
+  ctx.lineTo(46, 58);
+  ctx.lineTo(32, 54);
+  ctx.lineTo(18, 58);
+  ctx.lineTo(18, 54);
+  ctx.lineTo(24, 50);
+  ctx.lineTo(28, 36);
+  ctx.lineTo(8, 44);
+  ctx.lineTo(8, 38);
+  ctx.lineTo(28, 26);
+  ctx.closePath();
+  ctx.fill();
+  const tex = new THREE.CanvasTexture(cv);
+  return tex;
+}
+
+function initThreeJS() {
+  const canvas = document.getElementById('globe-canvas');
+  const container = document.getElementById('atc-globe');
+
+  /* Scene */
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x080E1A);
+  clock = new THREE.Clock();
+
+  /* Camera */
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+  camera.position.set(0, 0.3, 4.2);
+  camera.lookAt(0, 0, 0);
+
+  /* Renderer */
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  /* Lights */
+  const ambientLight = new THREE.AmbientLight(0x0D1A2E, 0.4);
+  scene.add(ambientLight);
+
+  const sunLight = new THREE.DirectionalLight(0xD4E8FF, 1.2);
+  sunLight.position.set(5, 3, 5);
+  scene.add(sunLight);
+
+  const pointLight = new THREE.PointLight(0x0EB8D5, 0.3);
+  pointLight.position.set(-3, 0, 3);
+  scene.add(pointLight);
+
+  /* Globe */
+  const globeGeo = new THREE.SphereGeometry(1.5, 64, 64);
+  const globeMat = new THREE.MeshPhongMaterial({
+    color:     0x0a1628,
+    emissive:  0x0a2040,
+    shininess: 25,
+    specular:  new THREE.Color(0x224466),
+  });
+  globe = new THREE.Mesh(globeGeo, globeMat);
+  scene.add(globe);
+
+  /* Atmosphere shader — uniforms 版，供 transitionToScene 即時調整 Fresnel 參數 */
+  const atmosphereMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      fresnelIntensity: { value: 1.4 },
+      fresnelColor:     { value: new THREE.Color(0.055, 0.722, 0.835) },
+      power:            { value: 2.0 }
+    },
+    vertexShader: `
+      varying vec3 vNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float fresnelIntensity;
+      uniform vec3 fresnelColor;
+      uniform float power;
+      varying vec3 vNormal;
+      void main() {
+        float i = pow(0.65 - dot(vNormal, vec3(0.0,0.0,1.0)), power);
+        gl_FragColor = vec4(fresnelColor * i * fresnelIntensity * 0.6, i * 0.8);
+      }
+    `,
+    blending:    THREE.AdditiveBlending,
+    side:        THREE.BackSide,
+    transparent: true,
+    depthWrite:  false
+  });
+  atmosphereMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(1.62, 64, 64),
+    atmosphereMaterial
+  );
+  atmosphereMesh.name = 'atmosphere';
+  scene.add(atmosphereMesh);
+
+  /* Grid lines */
+  const gridGeo = new THREE.SphereGeometry(1.502, 32, 16);
+  const gridMat = new THREE.MeshBasicMaterial({
+    color:       0x0EB8D5,
+    wireframe:   true,
+    transparent: true,
+    opacity:     0.05,
+  });
+  gridMesh = new THREE.Mesh(gridGeo, gridMat);
+  scene.add(gridMesh);
+
+  /* Stars */
+  if (renderMode === 'full') {
+    const starCount = 1000;
+    const positions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const r = 30 + Math.random() * 20;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const theta = Math.random() * Math.PI * 2;
+      positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      positions[i*3+1] = r * Math.cos(phi);
+      positions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    stars = new THREE.Points(starGeo, new THREE.PointsMaterial({
+      color: 0xCCDDEE, size: 0.06, sizeAttenuation: true, transparent: true, opacity: 0.7
+    }));
+    scene.add(stars);
+  }
+
+  /* Raycaster & mouse */
+  raycaster = new THREE.Raycaster();
+  mouse     = new THREE.Vector2(-10, -10);
+
+  /* Build flight arcs and plane sprites */
+  Object.entries(PRODUCTS).forEach(([id, pd]) => {
+    buildFlightArc(id, pd);
+    buildPlaneSprite(id, pd);
+    planeProgress[id] = Math.random(); /* stagger starting positions */
+    planeSpeeds[id]   = 0.0008 + Math.random() * 0.0005;
+    /* Adjust speed by status */
+    if (pd.statusCls === 'on-final')   planeSpeeds[id] *= 0.4;
+    if (pd.statusCls === 'holding')    planeSpeeds[id] *= 0.6;
+    if (pd.statusCls === 'active')     planeSpeeds[id] *= 0.1;
+  });
+
+  /* Taiwan marker */
+  buildTaiwanMarker();
+
+  /* Event listeners */
+  canvas.addEventListener('mousedown', onMouseDown);
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('mouseup',   onMouseUp);
+  canvas.addEventListener('mouseleave',() => { isDragging = false; });
+  canvas.addEventListener('click',     onGlobeClick);
+
+  /* Touch */
+  canvas.addEventListener('touchstart', onTouchStart, { passive: true });
+  canvas.addEventListener('touchmove',  onTouchMove,  { passive: true });
+  canvas.addEventListener('touchend',   () => { isDragging = false; });
+
+  /* Resize */
+  window.addEventListener('resize', onResize);
+
+  /* Start loop */
+  animate();
+}
+
+function buildFlightArc(id, pd) {
+  const r = 1.5;
+  const twStart = latLonToVec3(TW_LAT, TW_LON, r);
+  const destEnd = latLonToVec3(pd.lat, pd.lon, r);
+
+  /* Mid-point control: push out from center */
+  const mid = twStart.clone().add(destEnd).normalize().multiplyScalar(r + pd.arcH);
+  const curve = new THREE.QuadraticBezierCurve3(twStart, mid, destEnd);
+
+  /* Line */
+  const pts = curve.getPoints(80);
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  const lineMat = new THREE.LineBasicMaterial({
+    color:       pd.color,
+    transparent: true,
+    opacity:     0.55,
+  });
+  const line = new THREE.Line(lineGeo, lineMat);
+  globe.add(line);
+
+  arcs[id] = { curve, line, lineMat };
+}
+
+function buildPlaneSprite(id, pd) {
+  const tex = createPlaneTexture(pd.color);
+  const mat = new THREE.SpriteMaterial({
+    map:         tex,
+    transparent: true,
+    blending:    THREE.AdditiveBlending,
+    sizeAttenuation: true,
+  });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.12, 0.12, 1);
+  sprite.userData.productId = id;
+  globe.add(sprite);
+  planeSprites[id] = sprite;
+}
+
+function buildTaiwanMarker() {
+  /* Glow dot at Taiwan */
+  const twPos = latLonToVec3(TW_LAT, TW_LON, 1.52);
+  const geo = new THREE.SphereGeometry(0.025, 8, 8);
+  const mat = new THREE.MeshBasicMaterial({ color: 0x0EB8D5, transparent: true, opacity: 0.95 });
+  const dot = new THREE.Mesh(geo, mat);
+  dot.position.copy(twPos);
+  globe.add(dot);
+
+  /* TWN label - HTML overlay updated in animate */
+  window._twWorldPos = twPos.clone();
+}
+
+function animate() {
+  animFrameId = requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+
+  /* Auto-rotate globe */
+  if (autoRotate) {
+    globe.rotation.y += 0.001;
+  }
+
+  /* Stars drift */
+  if (stars) stars.rotation.y += 0.00008;
+
+  /* Move plane sprites along arcs */
+  Object.keys(planeSprites).forEach(id => {
+    planeProgress[id] += planeSpeeds[id];
+    if (planeProgress[id] >= 1) planeProgress[id] = 0;
+
+    const arc    = arcs[id];
+    const sprite = planeSprites[id];
+    const t      = planeProgress[id];
+    const pt     = arc.curve.getPoint(t);
+
+    /* Sprite position in globe local space */
+    sprite.position.copy(pt);
+
+    /* Update arc draw range for trail effect */
+    const pts = arc.curve.getPoints(80);
+    const trailLen = Math.floor(t * 80);
+    const geo = new THREE.BufferGeometry().setFromPoints(pts.slice(0, Math.max(2, trailLen)));
+    arc.line.geometry.dispose();
+    arc.line.geometry = geo;
+  });
+
+  /* Raycasting for hover tooltip */
+  raycaster.setFromCamera(mouse, camera);
+  const spriteArr = Object.values(planeSprites);
+  const hits = raycaster.intersectObjects(spriteArr);
+
+  if (hits.length > 0) {
+    const pid = hits[0].object.userData.productId;
+    showTooltip(hits[0].object, pid);
+    renderer.domElement.style.cursor = 'pointer';
+  } else {
+    hideTooltip();
+    renderer.domElement.style.cursor = isDragging ? 'grabbing' : 'grab';
+  }
+
+  // Atmosphere breathing — scale ±0.05, 8s sine wave
+  if (typeof atmosphereMesh !== 'undefined' && atmosphereMesh) {
+    const breathScale = 1.0 + Math.sin(Date.now() * 0.000785) * 0.05; // 0.000785 = 2π/8000
+    atmosphereMesh.scale.setScalar(breathScale);
+  }
+
+  // Plane Bob — ±2px vertical, 3s period, staggered per plane
+  // planeSprites is an object keyed by productId; convert to indexed array for stagger offset
+  const _spriteVals = Object.values(planeSprites);
+  _spriteVals.forEach((marker, i) => {
+    if (marker && marker.position) {
+      const bobOffset = Math.sin(Date.now() * 0.002094 + i * 1.2566) * 0.008; // 2π/3000, stagger 2π/5 per plane
+      marker.position.y += bobOffset * 0.016; // delta, not absolute
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+
+function showTooltip(sprite, productId) {
+  const pd = PRODUCTS[productId];
+  const tt = document.getElementById('flight-tooltip');
+
+  /* 3D -> screen coords */
+  const worldPos = new THREE.Vector3();
+  sprite.getWorldPosition(worldPos);
+  const screenPos = worldPos.clone().project(camera);
+  const canvas = renderer.domElement;
+  const rect   = canvas.getBoundingClientRect();
+  const x = (screenPos.x * 0.5 + 0.5) * canvas.clientWidth  + rect.left;
+  const y = (-(screenPos.y) * 0.5 + 0.5) * canvas.clientHeight + rect.top;
+
+  tt.style.left = Math.min(x + 12, window.innerWidth - 220) + 'px';
+  tt.style.top  = Math.max(y - 80, 60) + 'px';
+
+  document.getElementById('tooltip-header').textContent = pd.flightId + '  ' + pd.name;
+  document.getElementById('tt-sts').textContent  = pd.status;
+  document.getElementById('tt-alt').textContent  = pd.alt;
+  document.getElementById('tt-pax').textContent  = pd.pax;
+  document.getElementById('tt-eta').textContent  = pd.eta;
+  document.getElementById('tt-tech').textContent = pd.tech.slice(0,2).join(' · ');
+
+  tt.classList.add('visible');
+}
+
+function hideTooltip() {
+  document.getElementById('flight-tooltip').classList.remove('visible');
+}
+
+/* ---- Mouse / Touch ---- */
+function onMouseDown(e) {
+  isDragging = true;
+  autoRotate = false;
+  previousMousePos = { x: e.clientX, y: e.clientY };
+}
+
+function onMouseMove(e) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+
+  if (!isDragging) return;
+  const dx = e.clientX - previousMousePos.x;
+  globe.rotation.y += dx * 0.005;
+  previousMousePos = { x: e.clientX, y: e.clientY };
+}
+
+function onMouseUp() {
+  isDragging = false;
+  /* Resume auto-rotate after 3s idle */
+  setTimeout(() => { autoRotate = true; }, 3000);
+}
+
+function onGlobeClick(e) {
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(Object.values(planeSprites));
+  if (hits.length > 0) {
+    const pid = hits[0].object.userData.productId;
+    selectProduct(pid);
+  }
+}
+
+function onTouchStart(e) {
+  if (e.touches.length === 1) {
+    isDragging = true;
+    autoRotate = false;
+    previousMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+}
+
+function onTouchMove(e) {
+  if (!isDragging || e.touches.length !== 1) return;
+  const dx = e.touches[0].clientX - previousMousePos.x;
+  globe.rotation.y += dx * 0.005;
+  previousMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}
+
+function onResize() {
+  const container = document.getElementById('atc-globe');
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  if (w === 0 || h === 0) return;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+
+/* ============================================================
+   PRODUCT SELECTION + RIGHT COL DRAWER
+   ============================================================ */
+function selectProduct(productId) {
+  selectedProduct = productId;
+  const pd = PRODUCTS[productId];
+  if (!pd) return;
+
+  /* Highlight left col item */
+  document.querySelectorAll('.dispatch-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.product === productId);
+  });
+
+  /* Rotate globe toward product (animate) */
+  if (globe) {
+    const targetLon = pd.lon;
+    const targetY = -(targetLon + 180) * (Math.PI / 180) + Math.PI / 2;
+    const currentY = globe.rotation.y % (Math.PI * 2);
+    /* Simple tween */
+    let start = null;
+    const duration = 800;
+    const startY = globe.rotation.y;
+    function tweenGlobe(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      globe.rotation.y = startY + (targetY - startY) * ease;
+      if (p < 1) requestAnimationFrame(tweenGlobe);
+      else autoRotate = false;
+    }
+    requestAnimationFrame(tweenGlobe);
+  }
+
+  /* Highlight corresponding arc */
+  Object.keys(arcs).forEach(id => {
+    arcs[id].lineMat.opacity = id === productId ? 0.9 : 0.3;
+  });
+
+  /* Show product drawer in right col */
+  openProductDrawer(productId);
+
+  /* Show fixed CTA */
+  document.getElementById('fixed-cta').classList.add('visible');
+}
+
+function openProductDrawer(productId) {
+  const pd = PRODUCTS[productId];
+  if (!pd) return;
+
+  document.getElementById('drawer-flight-id').textContent = pd.flightId;
+  document.getElementById('drawer-title').textContent     = pd.name;
+  document.getElementById('drawer-sub').textContent       = pd.sub;
+
+  /* Badge */
+  const badge = document.getElementById('drawer-badge');
+  badge.innerHTML = `<div class="status-badge ${pd.statusCls}">${pd.status}</div>`;
+
+  /* Flight data */
+  document.getElementById('fd-sts').textContent = pd.status;
+  document.getElementById('fd-alt').textContent = pd.alt;
+  document.getElementById('fd-pax').textContent = pd.pax;
+  document.getElementById('fd-eta').textContent = pd.eta;
+
+  /* Arch */
+  document.getElementById('drawer-arch').innerHTML = pd.arch.replace(/\n/g, '<br>');
+
+  /* Tech pills */
+  const pills = document.getElementById('drawer-tech-pills');
+  pills.innerHTML = pd.tech.map(t => `<span class="tech-pill">${t}</span>`).join('');
+
+  /* Challenge */
+  document.getElementById('drawer-challenge').textContent = pd.challenge;
+
+  /* Show drawer, hide default */
+  document.getElementById('intel-default').classList.add('hidden');
+  const drawer = document.getElementById('product-drawer');
+  drawer.classList.add('visible');
+  drawer.style.opacity = '0';
+  drawer.style.transform = 'translateX(100%)';
+  /* Trigger transition */
+  requestAnimationFrame(() => {
+    drawer.style.transition = 'opacity 0.35s ease-out, transform 0.35s ease-out';
+    drawer.style.opacity = '1';
+    drawer.style.transform = 'translateX(0)';
+  });
+}
+
+function closeProductDrawer() {
+  const drawer = document.getElementById('product-drawer');
+  drawer.style.transition = 'opacity 0.2s ease-in, transform 0.2s ease-in';
+  drawer.style.opacity = '0';
+  drawer.style.transform = 'translateX(100%)';
+  setTimeout(() => {
+    drawer.classList.remove('visible');
+    document.getElementById('intel-default').classList.remove('hidden');
+    /* Reset arc highlighting */
+    Object.keys(arcs).forEach(id => { arcs[id].lineMat.opacity = 0.55; });
+    /* Reset left col */
+    document.querySelectorAll('.dispatch-item').forEach(el => el.classList.remove('active'));
+    selectedProduct = null;
+  }, 200);
+}
+
+/* ============================================================
+   KPI COUNT-UP (IntersectionObserver)
+   ============================================================ */
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+function countUp(el, target, prefix, suffix, duration) {
+  const isNeg = target < 0;
+  const absTarget = Math.abs(target);
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    const val = Math.floor(easeOutCubic(p) * absTarget);
+    el.textContent = (isNeg ? '-' : prefix) + val + suffix;
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = prefix + (isNeg ? '-' : '') + absTarget + suffix;
+  }
+  requestAnimationFrame(step);
+}
+
+function initKPICountup() {
+  const items = document.querySelectorAll('.kpi-item');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target.querySelector('.kpi-number');
+        if (!el || el.dataset.counted) return;
+        el.dataset.counted = '1';
+        const rawCount = parseInt(el.dataset.count, 10);
+        const prefix   = el.dataset.prefix || '';
+        const sfx      = el.dataset.sfx    || '';
+        countUp(el, rawCount, prefix, sfx, 1400);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  items.forEach(el => observer.observe(el));
+}
+
+/* ============================================================
+   HUD NODES TICKER UPDATE (text scramble)
+   ============================================================ */
+function initHUDTicker() {
+  const el = document.getElementById('hud-nodes');
+  if (!el) return;
+  let base = 125;
+  const chars = '0123456789';
+  function scramble(target) {
+    let step = 0;
+    const total = 8;
+    const iv = setInterval(() => {
+      let s = '';
+      const t = target.toString();
+      for (let i = 0; i < t.length; i++) {
+        if (step / total > i / t.length) s += t[i];
+        else s += chars[Math.floor(Math.random() * chars.length)];
+      }
+      el.textContent = 'CONNECTED NODES: ' + s;
+      step++;
+      if (step > total) {
+        clearInterval(iv);
+        el.textContent = 'CONNECTED NODES: ' + target;
+      }
+    }, 40);
+  }
+  setInterval(() => {
+    base += Math.floor(Math.random() * 5) - 2;
+    base = Math.max(118, Math.min(132, base));
+    scramble(base);
+  }, 7000 + Math.random() * 3000);
+}
+
+/* ============================================================
+   CTA ACTIONS (stubs - would link to real Calendly / PDF)
+   ============================================================ */
+function openConsultation() {
+  const email = 'frank@example.com';
+  /* In production: open Calendly widget or modal */
+  window.location.href = 'mailto:' + email + '?subject=Consultation%20Request&body=Hi%20Frank%2C%20I%27d%20like%20to%20schedule%20a%2015-minute%20architecture%20consultation.';
+}
+
+function downloadResume() {
+  /* In production: link to actual PDF */
+  alert('Resume PDF coming soon. Please contact frank@example.com for now.');
+}
+
+function toggleMobileMenu() {
+  /* Simple mobile menu toggle stub */
+  const nav = document.getElementById('atc-nav');
+  alert('Mobile menu: AI Hunter, DailyLumos, VocalCanvas, XunWu, WuMin - Click any left-panel item to explore');
+}
+
+/* ============================================================
+   FIXED CTA VISIBILITY (auto-show after 2s)
+   ============================================================ */
+function initFixedCTA() {
+  setTimeout(() => {
+    document.getElementById('fixed-cta').classList.add('visible');
+  }, 2000);
+}
+
+/* ============================================================
+   STATIC GLOBE FALLBACK
+   ============================================================ */
+function showStaticGlobe() {
+  document.getElementById('globe-canvas').style.display = 'none';
+  const sg = document.getElementById('static-globe');
+  sg.style.display = 'flex';
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  if (renderMode === 'static') {
+    showStaticGlobe();
+  } else {
+    try {
+      initThreeJS();
+    } catch(err) {
+      console.error('Three.js init failed:', err);
+      showStaticGlobe();
+    }
+  }
+
+  initKPICountup();
+  initHUDTicker();
+  initFixedCTA();
+});
+
+/* Keyboard accessibility: Escape closes drawer */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && selectedProduct) {
+    closeProductDrawer();
+  }
+});
+
+// ============================================================
+// SCENE SYSTEM — Scroll-Driven + Fresnel Shader Transitions
+// ============================================================
+const SCENES = {
+  COMMAND:    { fresnelIntensity: 1.4, fresnelR: 0.055, fresnelG: 0.722, fresnelB: 0.835, power: 2.0, particleScale: 1.0 },
+  ENTERPRISE: { fresnelIntensity: 0.8, fresnelR: 0.039, fresnelG: 0.420, fresnelB: 0.478, power: 4.0, particleScale: 0.8 },
+  TERMINAL:   { fresnelIntensity: 1.2, fresnelR: 0.055, fresnelG: 0.722, fresnelB: 0.835, power: 5.0, particleScale: 2.0 },
+  SKUNKWORKS: { fresnelIntensity: 1.6, fresnelR: 0.831, fresnelG: 0.580, fresnelB: 0.039, power: 2.5, particleScale: 1.2 },
+  CONTACT:    { fresnelIntensity: 1.0, fresnelR: 0.039, fresnelG: 0.420, fresnelB: 0.478, power: 3.0, particleScale: 0.9 }
+};
+
+let currentScene = 'COMMAND';
+let sceneTransitionRAF = null;
+
+function transitionToScene(sceneName, duration = 800) {
+  if (!SCENES[sceneName] || sceneName === currentScene) return;
+  const target = SCENES[sceneName];
+  const startTime = performance.now();
+
+  // 直接引用全域 atmosphereMesh 變數（已設 name='atmosphere' 且有 uniforms）
+  const atmoMesh = typeof atmosphereMesh !== 'undefined' ? atmosphereMesh : null;
+
+  if (sceneTransitionRAF) cancelAnimationFrame(sceneTransitionRAF);
+
+  function tick() {
+    const elapsed = performance.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
+
+    if (atmoMesh && atmoMesh.material && atmoMesh.material.uniforms) {
+      const u = atmoMesh.material.uniforms;
+      if (u.fresnelIntensity) u.fresnelIntensity.value = lerp(u.fresnelIntensity.value, target.fresnelIntensity, ease);
+      if (u.power) u.power.value = lerp(u.power.value, target.power, ease);
+      if (u.fresnelColor) {
+        u.fresnelColor.value.r = lerp(u.fresnelColor.value.r, target.fresnelR, ease);
+        u.fresnelColor.value.g = lerp(u.fresnelColor.value.g, target.fresnelG, ease);
+        u.fresnelColor.value.b = lerp(u.fresnelColor.value.b, target.fresnelB, ease);
+      }
+    }
+
+    if (t < 1) {
+      sceneTransitionRAF = requestAnimationFrame(tick);
+    } else {
+      currentScene = sceneName;
+    }
+  }
+  tick();
+
+  // Update scene indicator dots
+  document.querySelectorAll('.scene-dot').forEach(dot => {
+    dot.classList.toggle('active', dot.dataset.scene === sceneName);
+  });
+
+  // Update body data attribute for CSS hooks
+  document.body.dataset.scene = sceneName;
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// Scroll detection
+let lastScrollY = 0;
+const scrollSections = [
+  { threshold: 0.00, scene: 'COMMAND' },
+  { threshold: 0.25, scene: 'ENTERPRISE' },
+  { threshold: 0.50, scene: 'TERMINAL' },
+  { threshold: 0.75, scene: 'CONTACT' }
+];
+
+function onScroll() {
+  const scrollY = window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = maxScroll > 0 ? scrollY / maxScroll : 0;
+
+  for (let i = scrollSections.length - 1; i >= 0; i--) {
+    if (progress >= scrollSections[i].threshold) {
+      if (scrollSections[i].scene !== currentScene) {
+        transitionToScene(scrollSections[i].scene);
+      }
+      break;
+    }
+  }
+  lastScrollY = scrollY;
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+
+// Scene dot click navigation
+document.querySelectorAll('.scene-dot').forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const targetProgress = scrollSections[i] ? scrollSections[i].threshold : 0;
+    window.scrollTo({ top: maxScroll * targetProgress, behavior: 'smooth' });
+  });
+});
+
+// ============================================================
+// UNLOCK SYSTEM — Card Click → Globe Focus → Drawer Slide-in
+// ============================================================
+function triggerScanLine(targetEl) {
+  const rect = targetEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'scan-line-overlay';
+  el.style.top = rect.top + 'px';
+  document.body.appendChild(el);
+  el.style.opacity = '1';
+  let y = rect.top;
+  const end = rect.bottom;
+  const step = () => {
+    y += 4;
+    el.style.top = y + 'px';
+    if (y < end) requestAnimationFrame(step);
+    else { el.style.opacity = '0'; setTimeout(() => el.remove(), 100); }
+  };
+  requestAnimationFrame(step);
+}
+
+function triggerGlowBurst(x, y) {
+  const el = document.createElement('div');
+  el.className = 'glow-burst';
+  el.style.cssText = `left:${x - 60}px;top:${y - 20}px;width:120px;height:40px;`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.transition = 'opacity 400ms cubic-bezier(0.16,1,0.3,1), transform 400ms cubic-bezier(0.16,1,0.3,1)';
+    el.style.opacity = '1';
+    el.style.transform = 'scale(1)';
+    setTimeout(() => {
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 400);
+    }, 200);
+  });
+}
+
+function typewriterEffect(el, finalText, msPerChar = 40) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!';
+  let i = 0;
+  el.textContent = '';
+  el.classList.add('typewriter-text');
+  const interval = setInterval(() => {
+    if (i >= finalText.length) { clearInterval(interval); el.classList.remove('typewriter-text'); return; }
+    el.textContent = finalText.slice(0, i) +
+      chars[Math.floor(Math.random() * chars.length)];
+    i++;
+  }, msPerChar);
+}
+
+function unlockProduct(item, clickX, clickY) {
+  if (item.classList.contains('unlocking')) return;
+
+  // 步驟 1：0-200ms — 指示燈變色，鎖定欄位
+  item.classList.add('unlocking');
+  transitionToScene('SKUNKWORKS', 600);
+
+  // 步驟 2：200-800ms — Three.js 鏡頭聚焦
+  setTimeout(() => {
+    const productId = item.dataset.product || item.dataset.id;
+    if (typeof focusGlobe === 'function') focusGlobe(productId);
+    else if (typeof animateCameraTo === 'function') animateCameraTo(productId);
+    triggerGlowBurst(clickX, clickY);
+  }, 200);
+
+  // 步驟 3：800-1200ms — Drawer 滑入
+  setTimeout(() => {
+    triggerScanLine(item);
+    const rightPanel = document.getElementById('atc-right');
+    if (rightPanel) {
+      rightPanel.classList.add('unlocking');
+      const title = rightPanel.querySelector('h2, h3, .panel-title, [data-title], .section-title');
+      if (title) typewriterEffect(title, title.textContent || title.dataset.title || 'MISSION BRIEF', 40);
+      setTimeout(() => rightPanel.classList.remove('unlocking'), 300);
+    }
+    setTimeout(() => item.classList.remove('unlocking'), 400);
+  }, 800);
+}
+
+// Dispatch item → SKUNKWORKS + 解鎖動畫
+document.querySelectorAll('.dispatch-item, [data-product]').forEach(item => {
+  item.addEventListener('click', e => {
+    unlockProduct(item, e.clientX, e.clientY);
+  });
+
+  // Peek panel hover
+  item.addEventListener('mouseenter', () => item.classList.add('peek-visible'));
+  item.addEventListener('mouseleave', () => item.classList.remove('peek-visible'));
+});
+
+// ============================================================
+// UI FREEZE SYSTEM
+// ============================================================
+let freezeTimeout = null;
+
+function freezeUI() {
+  document.body.classList.remove('atc-unfreezing');
+  document.body.classList.add('atc-frozen');
+  if (freezeTimeout) clearTimeout(freezeTimeout);
+  // 安全超時：最多 1200ms 後強制解凍，防止 Three.js 卡頓導致 UI 永久無法操作
+  freezeTimeout = setTimeout(unfreezeUI, 1200);
+}
+
+function unfreezeUI() {
+  document.body.classList.remove('atc-frozen');
+  document.body.classList.add('atc-unfreezing');
+  setTimeout(() => document.body.classList.remove('atc-unfreezing'), 300);
+  if (freezeTimeout) { clearTimeout(freezeTimeout); freezeTimeout = null; }
+}
+
+// scene-dot 點擊時凍結 UI，鏡頭移動結束後解凍
+document.querySelectorAll('.scene-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    freezeUI();
+    setTimeout(unfreezeUI, 900);
+  });
+});
+
+// Mobile Bottom Sheet
+// 使用 arrow 避免與頂部 const isMobile 常數重名
+const isMobileViewport = () => window.innerWidth <= 768;
+
+document.querySelectorAll('.dispatch-item, [data-product]').forEach(item => {
+  item.addEventListener('click', () => {
+    if (isMobileViewport()) {
+      const sheet = document.getElementById('atc-right');
+      if (sheet) sheet.classList.add('sheet-open');
+    }
+  });
+});
+
+// Close sheet on backdrop tap
+document.addEventListener('click', e => {
+  if (!isMobileViewport()) return;
+  const sheet = document.getElementById('atc-right');
+  if (sheet && sheet.classList.contains('sheet-open')) {
+    if (!sheet.contains(e.target) && !e.target.closest('.dispatch-item, [data-product]')) {
+      sheet.classList.remove('sheet-open');
+    }
+  }
+});
+</script>
+</body>
+</html>

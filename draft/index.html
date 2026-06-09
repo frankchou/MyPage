@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F.CHOU : 全端 AI 架構師 × 企業轉型 PM</title>
+  <meta name="description" content="7 年 B2B 企業系統調度力與全端 AI 產品造局力。SAP 整合、跨國 WMS/HRIS、政府 EIP，以及 5 個原生 AI SaaS 產品的架構師。" />
+  <meta name="keywords" content="AI SaaS Architecture, B2B Enterprise PM, LLM Prompt Engineering, Vision AI Integration, SAP Data Pipeline, 全端架構師, 數位轉型" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS 設計系統 Token
+       ============================================================ */
+    :root {
+      /* 色彩 */
+      --color-bg:            #0a0a0f;
+      --color-bg-secondary:  #0d0d14;
+      --color-surface:       rgba(255, 255, 255, 0.04);
+      --color-surface-hover: rgba(255, 255, 255, 0.07);
+      --color-border:        rgba(255, 255, 255, 0.08);
+      --color-border-glow:   rgba(255, 255, 255, 0.15);
+
+      /* 文字 */
+      --color-text-primary:  #e8e8f0;
+      --color-text-secondary:#8888a8;
+      --color-text-muted:    #555570;
+
+      /* 強調色 : B2B 琥珀金 */
+      --color-amber:         #f5a623;
+      --color-amber-dim:     rgba(245, 166, 35, 0.15);
+      --color-amber-glow:    rgba(245, 166, 35, 0.3);
+
+      /* 強調色 : AI 霓虹青 */
+      --color-cyan:          #00f5d4;
+      --color-cyan-dim:      rgba(0, 245, 212, 0.1);
+      --color-cyan-glow:     rgba(0, 245, 212, 0.25);
+
+      /* 強調色 : AI 霓虹綠 */
+      --color-green:         #39ff14;
+      --color-green-dim:     rgba(57, 255, 20, 0.1);
+      --color-green-glow:    rgba(57, 255, 20, 0.2);
+
+      /* 字型 */
+      --font-display:  'Space Grotesk', system-ui, sans-serif;
+      --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+
+      /* 毛玻璃卡片 */
+      --glass-bg:     rgba(255, 255, 255, 0.05);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+      --glass-blur:   blur(12px);
+
+      /* 間距系統 */
+      --space-xs:  4px;
+      --space-sm:  8px;
+      --space-md:  16px;
+      --space-lg:  24px;
+      --space-xl:  40px;
+      --space-2xl: 64px;
+      --space-3xl: 96px;
+
+      /* 容器 */
+      --container-max: 1280px;
+      --nav-height: 72px;
+    }
+
+    /* ============================================================
+       Reset & 基礎
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-display);
+      background-color: var(--color-bg);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      /* 防止水平滾動 */
+    }
+
+    /* 選取文字顏色 */
+    ::selection {
+      background: var(--color-cyan-dim);
+      color: var(--color-cyan);
+    }
+
+    /* 全局捲軸美化 */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--color-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--color-border-glow); border-radius: 2px; }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    button {
+      font-family: var(--font-display);
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    /* 尊重動作減少偏好 */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ============================================================
+       通用元件
+       ============================================================ */
+    .container {
+      width: 100%;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--space-xl);
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: var(--glass-border);
+      border-radius: 12px;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .tag-green {
+      background: var(--color-green-dim);
+      color: var(--color-green);
+      border: 1px solid rgba(57, 255, 20, 0.25);
+    }
+
+    .tag-cyan {
+      background: var(--color-cyan-dim);
+      color: var(--color-cyan);
+      border: 1px solid rgba(0, 245, 212, 0.25);
+    }
+
+    .tag-amber {
+      background: var(--color-amber-dim);
+      color: var(--color-amber);
+      border: 1px solid rgba(245, 166, 35, 0.25);
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    /* ============================================================
+       1. 全息導覽列
+       ============================================================ */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      /* 初始：輕微毛玻璃 */
+      background: rgba(10, 10, 15, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--color-border);
+      transition: background 250ms ease-out, backdrop-filter 250ms ease-out, border-color 250ms ease-out;
+    }
+
+    /* JS 滾動後加深毛玻璃 */
+    .nav.scrolled {
+      background: rgba(10, 10, 15, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom-color: rgba(0, 245, 212, 0.15);
+    }
+
+    .nav__inner {
+      width: 100%;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav__logo {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--color-cyan);
+      text-shadow: 0 0 20px var(--color-cyan-glow);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .nav__logo-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-cyan);
+      box-shadow: 0 0 8px var(--color-cyan);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+      list-style: none;
+    }
+
+    .nav__link {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      transition: color 150ms ease-out;
+      position: relative;
+    }
+
+    .nav__link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      /* scaleX 取代 width 動畫，避免 layout reflow */
+      width: 100%;
+      height: 1px;
+      background: var(--color-cyan);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 200ms ease-out;
+    }
+
+    .nav__link:hover {
+      color: var(--color-text-primary);
+    }
+
+    .nav__link:hover::after {
+      transform: scaleX(1);
+    }
+
+    /* ============================================================
+       2. Hero : 航管中心主視覺
+       ============================================================ */
+    .hero {
+      position: relative;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      padding-top: var(--nav-height);
+    }
+
+    /* 點陣網格背景 */
+    .hero__grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 245, 212, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 212, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+
+    /* 雷達掃描動畫圓圈 */
+    .hero__radar {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 480px;
+      height: 480px;
+      opacity: 0.18;
+    }
+
+    .radar__ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--color-cyan);
+    }
+
+    .radar__ring:nth-child(1) { inset: 0; }
+    .radar__ring:nth-child(2) { inset: 15%; }
+    .radar__ring:nth-child(3) { inset: 30%; }
+    .radar__ring:nth-child(4) { inset: 45%; }
+
+    /* 十字線 */
+    .radar__cross-h,
+    .radar__cross-v {
+      position: absolute;
+      background: var(--color-cyan);
+      top: 50%;
+      left: 50%;
+    }
+
+    .radar__cross-h {
+      width: 100%;
+      height: 1px;
+      transform: translate(-50%, -50%);
+    }
+
+    .radar__cross-v {
+      width: 1px;
+      height: 100%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 雷達掃描扇形 */
+    .radar__sweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(0, 245, 212, 0.35) 30deg,
+        transparent 60deg
+      );
+      animation: radar-sweep 4s linear infinite;
+      transform-origin: center;
+    }
+
+    @keyframes radar-sweep {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* 雷達上的隨機光點 */
+    .radar__blip {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color-cyan);
+      box-shadow: 0 0 6px var(--color-cyan);
+      animation: blip-pulse 3s ease-in-out infinite;
+    }
+
+    .radar__blip:nth-child(5) { top: 28%; left: 62%; animation-delay: 0s; }
+    .radar__blip:nth-child(6) { top: 55%; left: 35%; animation-delay: 0.8s; }
+    .radar__blip:nth-child(7) { top: 42%; left: 70%; animation-delay: 1.6s; }
+    .radar__blip:nth-child(8) { top: 68%; left: 52%; animation-delay: 2.2s; }
+
+    @keyframes blip-pulse {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.8); }
+    }
+
+    /* 光暈 */
+    .hero__glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+
+    .hero__glow--cyan {
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(0, 245, 212, 0.06) 0%, transparent 70%);
+      right: 0;
+      top: 20%;
+    }
+
+    .hero__glow--amber {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(245, 166, 35, 0.04) 0%, transparent 70%);
+      left: -100px;
+      bottom: 20%;
+    }
+
+    /* Hero 內容 */
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      padding: var(--space-3xl) 0;
+    }
+
+    .hero__content .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2xl);
+      align-items: center;
+    }
+
+    .hero__left {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .hero__status-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-green);
+      box-shadow: 0 0 6px var(--color-green);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    .hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+
+    .hero__title-line--amber {
+      color: var(--color-amber);
+      text-shadow: 0 0 40px var(--color-amber-glow);
+      display: block;
+    }
+
+    .hero__title-line--cyan {
+      color: var(--color-cyan);
+      text-shadow: 0 0 40px var(--color-cyan-glow);
+      display: block;
+    }
+
+    .hero__subtitle {
+      font-size: clamp(15px, 1.5vw, 18px);
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      max-width: 480px;
+    }
+
+    .hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    /* 右側 : 指標速覽面板 */
+    .hero__panel {
+      position: relative;
+    }
+
+    .hero__panel-card {
+      padding: var(--space-xl);
+      border-radius: 16px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid rgba(0, 245, 212, 0.15);
+      box-shadow: 0 0 40px rgba(0, 245, 212, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-cyan);
+    }
+
+    .panel-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-green);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .panel-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .mini-stat {
+      padding: var(--space-md);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--color-border);
+    }
+
+    .mini-stat__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-xs);
+    }
+
+    .mini-stat__value {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-amber);
+      text-shadow: 0 0 20px var(--color-amber-glow);
+      line-height: 1.2;
+    }
+
+    .mini-stat__unit {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ============================================================
+       3. 懸浮 CTA
+       ============================================================ */
+    .cta-float {
+      position: fixed;
+      bottom: var(--space-xl);
+      right: var(--space-xl);
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-sm);
+    }
+
+    .cta-float__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 14px 24px;
+      border-radius: 8px;
+      border: 1px solid var(--color-cyan);
+      background: rgba(0, 245, 212, 0.08);
+      color: var(--color-cyan);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 200ms ease-out, box-shadow 200ms ease-out, transform 150ms ease-out;
+      box-shadow: 0 0 20px rgba(0, 245, 212, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      white-space: nowrap;
+    }
+
+    .cta-float__btn:hover {
+      background: rgba(0, 245, 212, 0.15);
+      box-shadow: 0 0 40px rgba(0, 245, 212, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .cta-float__btn:active {
+      transform: translateY(0);
+    }
+
+    .cta-float__btn svg {
+      flex-shrink: 0;
+    }
+
+    .cta-float__secondary {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-muted);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 150ms ease-out;
+      text-align: right;
+    }
+
+    .cta-float__secondary:hover {
+      color: var(--color-text-secondary);
+    }
+
+    /* ============================================================
+       Section 通用間距
+       ============================================================ */
+    .section {
+      padding: var(--space-3xl) 0;
+      position: relative;
+    }
+
+    .section__header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .section__title {
+      font-size: clamp(28px, 3.5vw, 48px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .section__desc {
+      font-size: 16px;
+      color: var(--color-text-secondary);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    /* 分隔線 */
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-border-glow), transparent);
+    }
+
+    /* ============================================================
+       4. B2B 企業神經中樞
+       ============================================================ */
+    .enterprise {
+      background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-secondary) 100%);
+    }
+
+    .enterprise__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .metric-card {
+      padding: var(--space-xl) var(--space-lg);
+      border-radius: 12px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--color-border);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 200ms ease-out, background 200ms ease-out;
+      cursor: default;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-amber), transparent);
+      opacity: 0;
+      transition: opacity 200ms ease-out;
+    }
+
+    .metric-card:hover {
+      border-color: rgba(245, 166, 35, 0.3);
+      background: var(--color-surface-hover);
+    }
+
+    .metric-card:hover::before {
+      opacity: 1;
+    }
+
+    /* 懸停時顯示背景拓撲圖 */
+    .metric-card__topology {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 300ms ease-out;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .metric-card:hover .metric-card__topology {
+      opacity: 1;
+    }
+
+    .topology-line {
+      position: absolute;
+      background: var(--color-amber);
+      opacity: 0.08;
+      border-radius: 1px;
+    }
+
+    .metric-card__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .metric-card__value {
+      font-family: var(--font-mono);
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 700;
+      color: var(--color-amber);
+      text-shadow: 0 0 30px var(--color-amber-glow);
+      line-height: 1;
+      margin-bottom: var(--space-sm);
+    }
+
+    .metric-card__desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .metric-card__source {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-text-muted);
+      margin-top: var(--space-md);
+      letter-spacing: 0.05em;
+    }
+
+    /* 企業專案列表 */
+    .enterprise__projects {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .project-card {
+      padding: var(--space-xl);
+      border-radius: 12px;
+      background: var(--glass-bg);
+      border: 1px solid var(--color-border);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 200ms ease-out, transform 200ms ease-out;
+    }
+
+    .project-card:hover {
+      border-color: rgba(245, 166, 35, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .project-card__index {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-amber);
+      letter-spacing: 0.2em;
+      margin-bottom: var(--space-md);
+    }
+
+    .project-card__name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+
+    .project-card__org {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .project-card__desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+    }
+
+    .project-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+    }
+
+    /* ============================================================
+       5. AI 機庫
+       ============================================================ */
+    .skunkworks {
+      background: var(--color-bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 背景網格 */
+    .skunkworks__bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(57, 255, 20, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57, 255, 20, 0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+
+    /* 背景光暈 */
+    .skunkworks__glow {
+      position: absolute;
+      width: 800px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(57, 255, 20, 0.04) 0%, transparent 70%);
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .skunkworks__nodes {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-md);
+    }
+
+    .node-card {
+      padding: var(--space-xl) var(--space-lg);
+      border-radius: 12px;
+      background: var(--glass-bg);
+      border: 1px solid var(--color-border);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 200ms ease-out, transform 200ms ease-out, background 200ms ease-out;
+    }
+
+    .node-card:hover {
+      border-color: rgba(57, 255, 20, 0.4);
+      transform: translateY(-4px);
+      background: rgba(57, 255, 20, 0.04);
+    }
+
+    /* 懸停時的掃描線效果 */
+    .node-card::after {
+      content: '';
+      position: absolute;
+      /* translateY 取代 top 動畫，避免 layout reflow */
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, transparent, rgba(57, 255, 20, 0.06), transparent);
+      transform: translateY(-250%);
+      transition: transform 400ms ease-out;
+    }
+
+    .node-card:hover::after {
+      transform: translateY(300%);
+    }
+
+    .node-card__orb {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(57, 255, 20, 0.1);
+      border: 1px solid rgba(57, 255, 20, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-lg);
+      position: relative;
+    }
+
+    /* pulse 呼吸動畫 */
+    .node-card__orb::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(57, 255, 20, 0.2);
+      animation: orb-pulse 2.5s ease-in-out infinite;
+    }
+
+    .node-card__orb::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(57, 255, 20, 0.1);
+      animation: orb-pulse 2.5s ease-in-out infinite 0.4s;
+    }
+
+    @keyframes orb-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+    }
+
+    .node-card__orb-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-green);
+      box-shadow: 0 0 10px var(--color-green);
+    }
+
+    .node-card__index {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-green);
+      letter-spacing: 0.2em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .node-card__name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-xs);
+      line-height: 1.3;
+    }
+
+    .node-card__codename {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-green);
+      opacity: 0.7;
+      margin-bottom: var(--space-md);
+    }
+
+    .node-card__desc {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+    }
+
+    .node-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* 節點展開側面板 : 用 translateX 取代 right 動畫，避免 layout reflow */
+    .node-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 480px;
+      height: 100dvh;
+      background: rgba(10, 10, 15, 0.95);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-left: 1px solid rgba(57, 255, 20, 0.2);
+      z-index: 200;
+      overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 300ms ease-out;
+      padding: var(--space-2xl) var(--space-xl);
+    }
+
+    .node-panel.open {
+      transform: translateX(0);
+    }
+
+    .node-panel__close {
+      position: absolute;
+      top: var(--space-xl);
+      right: var(--space-xl);
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: var(--glass-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: border-color 150ms ease-out, color 150ms ease-out;
+    }
+
+    .node-panel__close:hover {
+      border-color: var(--color-green);
+      color: var(--color-green);
+    }
+
+    .node-panel__breadcrumb {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-xl);
+      letter-spacing: 0.05em;
+    }
+
+    .node-panel__breadcrumb span {
+      color: var(--color-green);
+    }
+
+    .node-panel__title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+    }
+
+    .node-panel__subtitle {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-green);
+      margin-bottom: var(--space-xl);
+    }
+
+    .node-panel__section-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-xl);
+    }
+
+    .arch-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-radius: 6px;
+      background: rgba(57, 255, 20, 0.03);
+      border: 1px solid rgba(57, 255, 20, 0.1);
+    }
+
+    .arch-step__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: rgba(57, 255, 20, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .arch-step__label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    .arch-step__arrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--color-green);
+      text-align: center;
+      margin-left: var(--space-xl);
+    }
+
+    .panel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* 面板遮罩 */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 190;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease-out;
+    }
+
+    .overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ============================================================
+       6. Footer
+       ============================================================ */
+    .footer {
+      padding: var(--space-2xl) 0 var(--space-xl);
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg-secondary);
+    }
+
+    .footer__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2xl);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .footer__brand {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .footer__logo {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-cyan);
+      letter-spacing: 0.15em;
+    }
+
+    .footer__tagline {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    .footer__disclaimer {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .disclaimer-block {
+      padding: var(--space-md) var(--space-lg);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--color-border);
+      border-left: 2px solid var(--color-amber);
+    }
+
+    .disclaimer-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-amber);
+      margin-bottom: var(--space-xs);
+    }
+
+    .disclaimer-text {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+    }
+
+    .footer__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: var(--space-xl);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .footer__copyright {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-muted);
+    }
+
+    .footer__cert {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .cert-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-text-muted);
+      padding: 3px 8px;
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+      letter-spacing: 0.1em;
+    }
+
+    /* ============================================================
+       SVG 圖示（inline）
+       ============================================================ */
+    .icon {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       RWD
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .enterprise__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .enterprise__projects {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .skunkworks__nodes {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .hero__content .container {
+        grid-template-columns: 1fr;
+      }
+
+      .hero__radar {
+        opacity: 0.08;
+        width: 300px;
+        height: 300px;
+        right: -60px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --space-3xl: 64px;
+        --space-2xl: 40px;
+      }
+
+      .container {
+        padding: 0 var(--space-md);
+      }
+
+      .nav__links {
+        gap: var(--space-lg);
+      }
+
+      .enterprise__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .enterprise__projects {
+        grid-template-columns: 1fr;
+      }
+
+      .skunkworks__nodes {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer__inner {
+        grid-template-columns: 1fr;
+      }
+
+      .footer__bottom {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+      }
+
+      .cta-float {
+        bottom: var(--space-md);
+        right: var(--space-md);
+      }
+
+      .cta-float__btn {
+        font-size: 12px;
+        padding: 12px 16px;
+      }
+
+      .node-panel {
+        width: 100%;
+        /* 保持 translateX 策略，mobile 下全寬 */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .enterprise__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .skunkworks__nodes {
+        grid-template-columns: 1fr;
+      }
+
+      .nav__links {
+        display: none;
+      }
+    }
+
+    /* ============================================================
+       進場動畫 (IntersectionObserver 觸發)
+       ============================================================ */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 400ms ease-out, transform 400ms ease-out;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-up:nth-child(2) { transition-delay: 80ms; }
+    .fade-up:nth-child(3) { transition-delay: 160ms; }
+    .fade-up:nth-child(4) { transition-delay: 240ms; }
+    .fade-up:nth-child(5) { transition-delay: 320ms; }
+
+    /* 數字 count-up 樣式 */
+    .count-num {
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       1. 全息導覽列
+       ============================================================ -->
+  <nav class="nav" id="main-nav" role="navigation" aria-label="主導航">
+    <div class="nav__inner">
+      <a href="#" class="nav__logo" aria-label="F.CHOU 首頁">
+        <span class="nav__logo-dot" aria-hidden="true"></span>
+        F.CHOU.SYS
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="#enterprise" class="nav__link">Enterprise Core</a></li>
+        <li><a href="#skunkworks" class="nav__link">AI Skunkworks</a></li>
+        <li><a href="#terminal" class="nav__link">Terminal</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       2. Hero : 航管中心主視覺
+       ============================================================ -->
+  <section class="hero" aria-labelledby="hero-title">
+
+    <!-- 點陣網格 -->
+    <div class="hero__grid-bg" aria-hidden="true"></div>
+
+    <!-- 光暈 -->
+    <div class="hero__glow hero__glow--cyan" aria-hidden="true"></div>
+    <div class="hero__glow hero__glow--amber" aria-hidden="true"></div>
+
+    <!-- 雷達 -->
+    <div class="hero__radar" aria-hidden="true">
+      <div class="radar__ring"></div>
+      <div class="radar__ring"></div>
+      <div class="radar__ring"></div>
+      <div class="radar__ring"></div>
+      <div class="radar__cross-h"></div>
+      <div class="radar__cross-v"></div>
+      <div class="radar__sweep"></div>
+      <div class="radar__blip"></div>
+      <div class="radar__blip"></div>
+      <div class="radar__blip"></div>
+      <div class="radar__blip"></div>
+    </div>
+
+    <div class="hero__content">
+      <div class="container">
+        <!-- 左側文字 -->
+        <div class="hero__left">
+          <div class="hero__status-bar" role="status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="mono">SYSTEM_ONLINE</span>
+            <span style="color: var(--color-border-glow);">|</span>
+            <span class="mono">7Y_EXPERIENCE</span>
+            <span style="color: var(--color-border-glow);">|</span>
+            <span class="mono">5_AI_SAAS_LIVE</span>
+          </div>
+
+          <h1 class="hero__title" id="hero-title">
+            全端 AI 架構師
+            <span class="hero__title-line--amber">× 企業轉型 PM</span>
+            <span class="hero__title-line--cyan" style="font-size: 0.6em; letter-spacing: 0.02em; font-weight: 400;">
+              B2B 調度力 × B2C 造局力
+            </span>
+          </h1>
+
+          <p class="hero__subtitle">
+            從億級跨國系統的落地調度，到 5 個原生 AI SaaS 的獨立架構與上線，
+            這裡展示的不是履歷，而是<strong style="color: var(--color-text-primary);">引領次世代數位轉型的完整實力</strong>。
+          </p>
+
+          <div class="hero__meta">
+            <span class="tag tag-amber">PMP</span>
+            <span class="tag tag-amber">PMI-ACP</span>
+            <span class="tag tag-amber">PMI-PBA</span>
+            <span class="tag tag-cyan">React / Vue.js</span>
+            <span class="tag tag-cyan">SAP / ABAP</span>
+            <span class="tag tag-green">LLM / RAG</span>
+            <span class="tag tag-green">Vision AI</span>
+          </div>
+        </div>
+
+        <!-- 右側指標速覽面板 -->
+        <div class="hero__panel" aria-label="核心指標速覽">
+          <div class="hero__panel-card">
+            <div class="panel-header">
+              <span class="panel-title">COMMAND_CENTER / STATUS</span>
+              <span class="panel-status">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--color-green);box-shadow:0 0 6px var(--color-green);display:inline-block;" aria-hidden="true"></span>
+                OPERATIONAL
+              </span>
+            </div>
+            <div class="panel-stats-grid">
+              <div class="mini-stat">
+                <div class="mini-stat__label">時間成本節省</div>
+                <div class="mini-stat__value">
+                  <span class="count-num" data-target="97" data-suffix="%">0%</span>
+                </div>
+                <div class="mini-stat__unit">會議室系統 / 緯創</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat__label">效率提升</div>
+                <div class="mini-stat__value">
+                  <span class="count-num" data-target="15" data-prefix="+" data-suffix="%">0%</span>
+                </div>
+                <div class="mini-stat__unit">跨國 WMS/HRIS</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat__label">數據正確性</div>
+                <div class="mini-stat__value">
+                  <span class="count-num" data-target="100" data-suffix="%">0%</span>
+                </div>
+                <div class="mini-stat__unit">SAP 整合 / 爭鮮</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat__label">跨國調度規模</div>
+                <div class="mini-stat__value" style="font-size: 22px; line-height: 1.4;">
+                  2 國 5 部門
+                </div>
+                <div class="mini-stat__unit">集團核心系統</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       3. 懸浮 CTA（右下角常駐）
+       ============================================================ -->
+  <div class="cta-float" role="complementary" aria-label="預約顧問">
+    <a href="#" class="cta-float__btn" aria-label="預約技術顧問對談">
+      <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+      </svg>
+      預約技術顧問對談
+    </a>
+    <a href="#" class="cta-float__secondary" aria-label="下載 PDF 履歷">↓ 下載 PDF 履歷</a>
+  </div>
+
+  <div class="section-divider" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       4. B2B 企業神經中樞
+       ============================================================ -->
+  <section class="section enterprise" id="enterprise" aria-labelledby="enterprise-title">
+    <div class="container">
+      <header class="section__header">
+        <span class="section-label">Enterprise Command Core</span>
+        <h2 class="section__title" id="enterprise-title">
+          企業神經中樞
+          <span style="color: var(--color-amber);">B2B 實戰戰績</span>
+        </h2>
+        <p class="section__desc">
+          跨越政府、餐飲集團、科技製造三大產業的系統架構與專案調度經驗，
+          每一筆數據都是真實落地的 ROI 印證。
+        </p>
+      </header>
+
+      <!-- 4 個數據卡片 -->
+      <div class="enterprise__grid" role="list" aria-label="核心績效指標">
+
+        <div class="metric-card fade-up" role="listitem">
+          <div class="metric-card__topology" aria-hidden="true">
+            <div class="topology-line" style="width:1px;height:80%;left:30%;top:10%;"></div>
+            <div class="topology-line" style="width:1px;height:60%;left:60%;top:20%;"></div>
+            <div class="topology-line" style="width:60%;height:1px;left:20%;top:40%;"></div>
+          </div>
+          <div class="metric-card__label">時間成本壓縮</div>
+          <div class="metric-card__value">
+            <span class="count-num" data-target="97" data-prefix="-" data-suffix="%">-0%</span>
+          </div>
+          <div class="metric-card__desc">
+            橫跨 4 棟 800 間會議室的人工巡檢流程，透過 QR Code 預約系統縮短至 1 分鐘線上完成
+          </div>
+          <div class="metric-card__source">SRC: 緯創集團黑客松 · 2020 · 全集團推行</div>
+        </div>
+
+        <div class="metric-card fade-up" role="listitem">
+          <div class="metric-card__topology" aria-hidden="true">
+            <div class="topology-line" style="width:1px;height:70%;left:45%;top:15%;"></div>
+            <div class="topology-line" style="width:70%;height:1px;left:15%;top:50%;"></div>
+          </div>
+          <div class="metric-card__label">效率提升</div>
+          <div class="metric-card__value">
+            <span class="count-num" data-target="15" data-prefix="+" data-suffix="%">+0%</span>
+          </div>
+          <div class="metric-card__desc">
+            跨國 WMS/HRIS 整合系統上線，一年處理 23 個團隊超過 100 個專案，提升人力分配精準度
+          </div>
+          <div class="metric-card__source">SRC: 緯創資通 · WMS/HRIS · 2 國 5 部門</div>
+        </div>
+
+        <div class="metric-card fade-up" role="listitem">
+          <div class="metric-card__topology" aria-hidden="true">
+            <div class="topology-line" style="width:1px;height:90%;left:20%;top:5%;"></div>
+            <div class="topology-line" style="width:80%;height:1px;left:10%;top:35%;"></div>
+            <div class="topology-line" style="width:80%;height:1px;left:10%;top:65%;"></div>
+          </div>
+          <div class="metric-card__label">數據正確性</div>
+          <div class="metric-card__value">
+            <span class="count-num" data-target="100" data-suffix="%">0%</span>
+          </div>
+          <div class="metric-card__desc">
+            建立 SAP 數據交換規範，整合外部系統客製化需求，同步縮短 50% 開發週期，消除系統對接風險
+          </div>
+          <div class="metric-card__source">SRC: 爭鮮餐飲集團 · SAP 整合 · 2022-2023</div>
+        </div>
+
+        <div class="metric-card fade-up" role="listitem">
+          <div class="metric-card__topology" aria-hidden="true">
+            <div class="topology-line" style="width:1px;height:85%;left:55%;top:8%;"></div>
+            <div class="topology-line" style="width:55%;height:1px;left:22%;top:45%;"></div>
+          </div>
+          <div class="metric-card__label">跨國調度規模</div>
+          <div class="metric-card__value" style="font-size: clamp(28px, 3vw, 40px); line-height: 1.2;">
+            2 國 5 部門
+          </div>
+          <div class="metric-card__desc">
+            帶領跨台灣、海外雙地區共 5 部門完成集團專案管理核心系統，解決 80% 初期抗拒阻力
+          </div>
+          <div class="metric-card__source">SRC: 緯創資通 · 全球 23 團隊 · 2019-2022</div>
+        </div>
+      </div>
+
+      <!-- 企業專案卡片 -->
+      <div class="enterprise__projects" role="list" aria-label="代表性企業專案">
+
+        <div class="project-card fade-up" role="listitem">
+          <div class="project-card__index">PROJECT / 01</div>
+          <div class="project-card__name">政府 EIP 零到一建置</div>
+          <div class="project-card__org">台灣源訊 ATOS × 經濟部中小企業署 · 2023-2026</div>
+          <div class="project-card__desc">
+            在 RFP 需求模糊、時程受限的標案環境下，利用 Notion AI 加速需求整理，
+            設計「即時加密 + 暫存即清除」機制突破政府資安規範限制，準時交付並獲委託後續專案。
+          </div>
+          <div class="project-card__tags">
+            <span class="tag tag-amber">EIP 架構</span>
+            <span class="tag tag-amber">Gov. Compliance</span>
+            <span class="tag tag-cyan">Notion AI</span>
+            <span class="tag tag-cyan">即時加密</span>
+          </div>
+        </div>
+
+        <div class="project-card fade-up" role="listitem">
+          <div class="project-card__index">PROJECT / 02</div>
+          <div class="project-card__name">跨國 WMS/HRIS 整合系統</div>
+          <div class="project-card__org">緯創資通 · 2 國 5 部門 · 2019-2022</div>
+          <div class="project-card__desc">
+            串接多國專案資料與即時通訊，呈現專案健康度與個人工作量。
+            以「個別擊破、逐步滲透」策略化解 80% 初期反對，上線即成為公司核心系統。
+          </div>
+          <div class="project-card__tags">
+            <span class="tag tag-amber">跨國 PM</span>
+            <span class="tag tag-amber">WMS 整合</span>
+            <span class="tag tag-cyan">PHP / React</span>
+            <span class="tag tag-cyan">Power BI</span>
+          </div>
+        </div>
+
+        <div class="project-card fade-up" role="listitem">
+          <div class="project-card__index">PROJECT / 03</div>
+          <div class="project-card__name">集團 FP&A × AI 決策系統</div>
+          <div class="project-card__org">緯創資通 · 執行長決策數據源 · 2019-2022</div>
+          <div class="project-card__desc">
+            協助建置集團 FP&A 與 AI 策略決策系統。說服資深商業分析師提供判斷邏輯訓練 AI 模型，
+            減少工廠財務精算 80% 時間，成功預測三個月生產成本與 ROI/IRR。
+          </div>
+          <div class="project-card__tags">
+            <span class="tag tag-amber">FP&A</span>
+            <span class="tag tag-amber">AI 決策</span>
+            <span class="tag tag-cyan">ROI 預測</span>
+            <span class="tag tag-green">ML 模型</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       5. AI 機庫
+       ============================================================ -->
+  <section class="section skunkworks" id="skunkworks" aria-labelledby="skunkworks-title">
+    <div class="skunkworks__bg" aria-hidden="true"></div>
+    <div class="skunkworks__glow" aria-hidden="true"></div>
+
+    <div class="container">
+      <header class="section__header">
+        <span class="section-label" style="color: var(--color-green); opacity: 0.8;">AI Skunkworks</span>
+        <h2 class="section__title" id="skunkworks-title">
+          AI 前瞻
+          <span style="color: var(--color-green); text-shadow: 0 0 40px var(--color-green-glow);">機庫</span>
+        </h2>
+        <p class="section__desc">
+          5 個從 0 到 1 親手架構並上線的 AI SaaS 產品，展示的不是介面，
+          而是資料流向、API 串接邏輯與 AI 模型編排的底層硬核實力。
+        </p>
+      </header>
+
+      <!-- 5 個技術節點 -->
+      <div class="skunkworks__nodes" role="list" aria-label="AI 技術節點">
+
+        <!-- Node 01: AI Hunter -->
+        <div class="node-card fade-up" role="listitem" tabindex="0"
+             aria-label="Node 01 AI Hunter，點擊展開技術詳情"
+             data-node="ai-hunter"
+             onclick="openNodePanel('ai-hunter')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){openNodePanel('ai-hunter')}">
+          <div class="node-card__orb" aria-hidden="true">
+            <span class="node-card__orb-dot"></span>
+          </div>
+          <div class="node-card__index">NODE 01</div>
+          <div class="node-card__name">AI Hunter</div>
+          <div class="node-card__codename">求職加速器</div>
+          <div class="node-card__desc">
+            多源數據映射 × LLM 編排引擎。整合命理盤、履歷、JD 進行高維度交叉分析，實現個性化求職教練。
+          </div>
+          <div class="node-card__tags">
+            <span class="tag tag-green">RAG</span>
+            <span class="tag tag-green">LLM</span>
+            <span class="tag tag-cyan">Prompt Eng.</span>
+          </div>
+        </div>
+
+        <!-- Node 02: 尋物小精靈 -->
+        <div class="node-card fade-up" role="listitem" tabindex="0"
+             aria-label="Node 02 尋物小精靈，點擊展開技術詳情"
+             data-node="finder"
+             onclick="openNodePanel('finder')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){openNodePanel('finder')}">
+          <div class="node-card__orb" aria-hidden="true">
+            <span class="node-card__orb-dot"></span>
+          </div>
+          <div class="node-card__index">NODE 02</div>
+          <div class="node-card__name">尋物小精靈</div>
+          <div class="node-card__codename">多終端狀態同步</div>
+          <div class="node-card__desc">
+            家庭多用戶資料庫邊界處理與高併發同步架構，跨終端即時追蹤物品位置與效期。
+          </div>
+          <div class="node-card__tags">
+            <span class="tag tag-green">Firebase RT</span>
+            <span class="tag tag-green">Multi-User</span>
+            <span class="tag tag-cyan">Sync Logic</span>
+          </div>
+        </div>
+
+        <!-- Node 03: DailyLumos -->
+        <div class="node-card fade-up" role="listitem" tabindex="0"
+             aria-label="Node 03 DailyLumos，點擊展開技術詳情"
+             data-node="dailylumos"
+             onclick="openNodePanel('dailylumos')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){openNodePanel('dailylumos')}">
+          <div class="node-card__orb" aria-hidden="true">
+            <span class="node-card__orb-dot"></span>
+          </div>
+          <div class="node-card__index">NODE 03</div>
+          <div class="node-card__name">DailyLumos</div>
+          <div class="node-card__codename">語義深度檢索</div>
+          <div class="node-card__desc">
+            海量聖經文本向量化儲存，RAG 參數調校降低幻覺，確保 AI 輸出的穩定性與神學準確性。
+          </div>
+          <div class="node-card__tags">
+            <span class="tag tag-green">Vector DB</span>
+            <span class="tag tag-green">RAG</span>
+            <span class="tag tag-cyan">Embedding</span>
+          </div>
+        </div>
+
+        <!-- Node 04: VocalCanvas -->
+        <div class="node-card fade-up" role="listitem" tabindex="0"
+             aria-label="Node 04 VocalCanvas，點擊展開技術詳情"
+             data-node="vocalcanvas"
+             onclick="openNodePanel('vocalcanvas')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){openNodePanel('vocalcanvas')}">
+          <div class="node-card__orb" aria-hidden="true">
+            <span class="node-card__orb-dot"></span>
+          </div>
+          <div class="node-card__index">NODE 04</div>
+          <div class="node-card__name">VocalCanvas</div>
+          <div class="node-card__codename">多模態串流最佳化</div>
+          <div class="node-card__desc">
+            Text-to-Audio API 效能調校、朗讀 + 背景音樂配置、語速處理演算法，業界唯一長音檔串流方案。
+          </div>
+          <div class="node-card__tags">
+            <span class="tag tag-green">TTS API</span>
+            <span class="tag tag-green">Streaming</span>
+            <span class="tag tag-cyan">Audio Mix</span>
+          </div>
+        </div>
+
+        <!-- Node 05: 無敏毛孩 -->
+        <div class="node-card fade-up" role="listitem" tabindex="0"
+             aria-label="Node 05 無敏毛孩，點擊展開技術詳情"
+             data-node="petai"
+             onclick="openNodePanel('petai')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){openNodePanel('petai')}">
+          <div class="node-card__orb" aria-hidden="true">
+            <span class="node-card__orb-dot"></span>
+          </div>
+          <div class="node-card__index">NODE 05</div>
+          <div class="node-card__name">無敏毛孩</div>
+          <div class="node-card__codename">視覺 AI 領域映射</div>
+          <div class="node-card__desc">
+            Vision AI 影像辨識與寵物成分垂直資料庫低延遲映射，隨手一拍即知是否適合毛孩。
+          </div>
+          <div class="node-card__tags">
+            <span class="tag tag-green">Vision AI</span>
+            <span class="tag tag-green">OCR</span>
+            <span class="tag tag-cyan">Domain DB</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       6. Footer
+       ============================================================ -->
+  <footer class="footer" id="terminal" role="contentinfo">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <div class="footer__logo">F.CHOU.SYS</div>
+          <p class="footer__tagline">
+            全端 AI 架構師 × 企業轉型 PM<br />
+            B2B 調度力 × B2C 造局力的完整 T 型人才
+          </p>
+          <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
+            <span class="cert-badge">PMP</span>
+            <span class="cert-badge">PMI-ACP</span>
+            <span class="cert-badge">PMI-PBA</span>
+            <span class="cert-badge">2024 ATOS 優秀員工</span>
+          </div>
+        </div>
+
+        <div class="footer__disclaimer">
+          <div class="disclaimer-block">
+            <div class="disclaimer-title">NDA 去識別化聲明</div>
+            <p class="disclaimer-text">
+              本站展示之企業專案數據均依據保密協議進行去識別化與比例轉換。
+              所有系統架構與商業成效已模糊化處理，不包含前雇主之機敏業務邏輯與原始程式碼。
+            </p>
+          </div>
+          <div class="disclaimer-block">
+            <div class="disclaimer-title">AI 模塊免責聲明</div>
+            <p class="disclaimer-text">
+              AI 機庫內之所有模塊（含營養分析與心靈文本解析）均為技術概念驗證（PoC），
+              用於展示 AI 底層架構串接能力，不構成實質醫療、獸醫診斷或心理諮商行為。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__copyright mono">
+          © 2026 F.CHOU.SYS. All rights reserved.
+          Built with pure HTML + CSS + Vanilla JS.
+        </p>
+        <div class="footer__cert">
+          <span class="cert-badge">國立高雄科技大學 · 電腦與通訊工程</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       節點詳情側面板
+       ============================================================ -->
+  <div class="overlay" id="panel-overlay" aria-hidden="true" onclick="closeNodePanel()"></div>
+
+  <aside class="node-panel" id="node-panel" role="dialog" aria-modal="true" aria-label="技術詳情" aria-hidden="true">
+    <button class="node-panel__close" onclick="closeNodePanel()" aria-label="關閉面板">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div id="node-panel-content">
+      <!-- JS 動態填充 -->
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       JavaScript
+       ============================================================ -->
+  <script>
+    'use strict';
+
+    // ============================================================
+    // 導覽列 scroll 毛玻璃加深
+    // ============================================================
+    (function initNavScroll() {
+      const nav = document.getElementById('main-nav');
+      if (!nav) return;
+
+      let ticking = false;
+
+      function onScroll() {
+        if (!ticking) {
+          window.requestAnimationFrame(function () {
+            if (window.scrollY > 40) {
+              nav.classList.add('scrolled');
+            } else {
+              nav.classList.remove('scrolled');
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+    // ============================================================
+    // IntersectionObserver : 進場動畫 + count-up 觸發
+    // ============================================================
+    (function initIntersection() {
+      // 進場動畫
+      const fadeEls = document.querySelectorAll('.fade-up');
+      if ('IntersectionObserver' in window) {
+        const fadeObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              fadeObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+
+        fadeEls.forEach(function (el) {
+          fadeObserver.observe(el);
+        });
+      } else {
+        // fallback：直接顯示
+        fadeEls.forEach(function (el) {
+          el.classList.add('visible');
+        });
+      }
+    })();
+
+    // ============================================================
+    // 數字 Count-up 動畫
+    // ============================================================
+    (function initCountUp() {
+      const countEls = document.querySelectorAll('.count-num[data-target]');
+      if (!countEls.length) return;
+
+      // 尊重動作減少偏好
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function animateCount(el) {
+        const target = parseInt(el.dataset.target, 10);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        const duration = 1200; // ms
+        const startTime = performance.now();
+
+        if (prefersReduced) {
+          el.textContent = prefix + target + suffix;
+          return;
+        }
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // easeOutCubic
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.round(eased * target);
+          el.textContent = prefix + current + suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          }
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      if ('IntersectionObserver' in window) {
+        const countObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              animateCount(entry.target);
+              countObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.5 });
+
+        countEls.forEach(function (el) {
+          countObserver.observe(el);
+        });
+      } else {
+        countEls.forEach(function (el) {
+          const t = el.dataset.target;
+          const p = el.dataset.prefix || '';
+          const s = el.dataset.suffix || '';
+          el.textContent = p + t + s;
+        });
+      }
+    })();
+
+    // ============================================================
+    // 節點側面板資料
+    // ============================================================
+    var NODE_DATA = {
+      'ai-hunter': {
+        index: 'NODE 01',
+        name: 'AI Hunter',
+        subtitle: '求職加速器 : 多源數據映射 × LLM 編排引擎',
+        breadcrumb: 'Root > AI_Skunkworks > Multi-Agent_Architecture',
+        archFlow: [
+          { label: '使用者輸入 (履歷 / JD / 求職偏好 / 命理盤)' },
+          { label: '→ 資料標準化層 (Template Normalization)' },
+          { label: '→ RAG 向量檢索 (職缺庫 / 公司文化語料)' },
+          { label: '→ LLM 編排層 (Multi-step Prompt Chain)' },
+          { label: '→ 高維度交叉分析 (JD × 文化 × 命理盤)' },
+          { label: '→ 個性化輸出 (履歷修正 / 面試策略 / 薪資分析)' }
+        ],
+        tags: ['RAG', 'LLM', 'Prompt Engineering', 'Vector DB', 'Multi-Agent'],
+        techNote: '核心難點：命理盤資料結構化轉換為 LLM 可理解的語義空間，並設計防幻覺的 RAG 參數策略，確保職缺推薦邏輯的可解釋性。'
+      },
+      'finder': {
+        index: 'NODE 02',
+        name: '尋物小精靈',
+        subtitle: '多終端狀態同步架構 : 家庭物品管理系統',
+        breadcrumb: 'Root > AI_Skunkworks > Real-Time_Sync',
+        archFlow: [
+          { label: '多終端 Client (iOS / Android / Web)' },
+          { label: '→ Firebase Realtime DB (即時同步層)' },
+          { label: '→ 多用戶邊界處理 (家庭角色 / 權限管理)' },
+          { label: '→ 效期偵測引擎 (排程掃描 + Push Notification)' },
+          { label: '→ 購物建議模組 (重複購買防呆邏輯)' }
+        ],
+        tags: ['Firebase', 'Real-time Sync', 'Multi-User DB', 'Push Notification', 'Mobile'],
+        techNote: '核心難點：多用戶同時寫入的衝突解決（Optimistic Concurrency）與家庭成員資料隔離邊界設計，確保高併發下的資料一致性。'
+      },
+      'dailylumos': {
+        index: 'NODE 03',
+        name: 'DailyLumos',
+        subtitle: '語義深度檢索與解析系統 : 聖經箴言 AI 導讀',
+        breadcrumb: 'Root > AI_Skunkworks > Semantic_Retrieval',
+        archFlow: [
+          { label: '使用者問題輸入 (自然語言)' },
+          { label: '→ Embedding 模型 (文本向量化)' },
+          { label: '→ Vector DB 語義檢索 (Cosine Similarity)' },
+          { label: '→ 上下文組裝 (RAG Context Window)' },
+          { label: '→ LLM 語義解析 + 神學背景補充' },
+          { label: '→ 輸出 (箴言卡 + AI 解析 + 原文對照)' }
+        ],
+        tags: ['Vector DB', 'RAG', 'Embedding', 'Semantic Search', 'LLM'],
+        techNote: '核心難點：降低神學文本 LLM 幻覺率，透過細粒度 RAG 參數調校（Temperature / Top-P / Context Window）確保解析準確性與一致性。'
+      },
+      'vocalcanvas': {
+        index: 'NODE 04',
+        name: 'VocalCanvas',
+        subtitle: '多模態串流最佳化 : Text-to-Audio 生產引擎',
+        breadcrumb: 'Root > AI_Skunkworks > Multimodal_Streaming',
+        archFlow: [
+          { label: '文字輸入 (長文 / 短文 / 情境選擇)' },
+          { label: '→ 語速處理演算法 (節奏重組 / 斷句最佳化)' },
+          { label: '→ TTS API 串流呼叫 (分段並行處理)' },
+          { label: '→ 音頻混合層 (朗讀軌 + 背景音樂軌)' },
+          { label: '→ 串流輸出 / 下載 (MP3 / WAV)' }
+        ],
+        tags: ['TTS API', 'Audio Streaming', 'Multi-track Mix', 'Cost Optimization'],
+        techNote: '核心難點：長音檔（30 分鐘以上）的串流分段策略，解決 API Token Limit 與音頻銜接點的自然斷句問題，同時控制 API 運算成本。'
+      },
+      'petai': {
+        index: 'NODE 05',
+        name: '無敏毛孩',
+        subtitle: '視覺 AI 領域映射系統 : 寵物成分辨識引擎',
+        breadcrumb: 'Root > AI_Skunkworks > Vision_AI_Domain_Mapping',
+        archFlow: [
+          { label: '使用者拍照上傳 (產品成分表圖片)' },
+          { label: '→ Vision AI + OCR (圖片文字提取)' },
+          { label: '→ 成分解析層 (NLP 結構化處理)' },
+          { label: '→ 垂直領域 DB 映射 (寵物禁忌成分庫)' },
+          { label: '→ 風險評分引擎 (個別寵物體質比對)' },
+          { label: '→ 即時輸出 (安全評估 + 替代品推薦)' }
+        ],
+        tags: ['Vision AI', 'OCR', 'NLP', 'Domain DB', 'Real-time Mapping'],
+        techNote: '核心難點：OCR 提取的非結構化成分文本標準化，以及寵物體質個人化參數如何與通用成分庫進行低延遲交叉映射。'
+      }
+    };
+
+    // ============================================================
+    // 開啟節點面板
+    // ============================================================
+    function openNodePanel(nodeId) {
+      var data = NODE_DATA[nodeId];
+      if (!data) return;
+
+      var panel = document.getElementById('node-panel');
+      var overlay = document.getElementById('panel-overlay');
+      var content = document.getElementById('node-panel-content');
+      if (!panel || !overlay || !content) return;
+
+      // 建立 HTML
+      var flowHTML = data.archFlow.map(function (step) {
+        return '<div class="arch-step">' +
+          '<div class="arch-step__icon" aria-hidden="true">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2">' +
+          '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>' +
+          '</svg>' +
+          '</div>' +
+          '<span class="arch-step__label">' + escapeHtml(step.label) + '</span>' +
+          '</div>';
+      }).join('');
+
+      var tagsHTML = data.tags.map(function (tag) {
+        return '<span class="tag tag-green">' + escapeHtml(tag) + '</span>';
+      }).join('');
+
+      content.innerHTML =
+        '<div class="node-panel__breadcrumb mono">' +
+          escapeHtml(data.breadcrumb) +
+        '</div>' +
+        '<p class="node-panel__title">' + escapeHtml(data.name) + '</p>' +
+        '<p class="node-panel__subtitle">' + escapeHtml(data.subtitle) + '</p>' +
+        '<div class="node-panel__section-title">底層架構資料流</div>' +
+        '<div class="arch-flow">' + flowHTML + '</div>' +
+        '<div class="node-panel__section-title">技術棧</div>' +
+        '<div class="panel-tags" style="margin-bottom: var(--space-xl);">' + tagsHTML + '</div>' +
+        '<div class="node-panel__section-title">技術難點克服</div>' +
+        '<div style="padding: var(--space-md); border-radius: 8px; background: rgba(57,255,20,0.04); border: 1px solid rgba(57,255,20,0.15); font-size: 13px; color: var(--color-text-secondary); line-height: 1.7;">' +
+          escapeHtml(data.techNote) +
+        '</div>';
+
+      // 開啟
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      overlay.classList.add('visible');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      // focus 面板（a11y）
+      panel.focus();
+    }
+
+    // ============================================================
+    // 關閉節點面板
+    // ============================================================
+    function closeNodePanel() {
+      var panel = document.getElementById('node-panel');
+      var overlay = document.getElementById('panel-overlay');
+      if (!panel || !overlay) return;
+
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      overlay.classList.remove('visible');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    // ESC 鍵關閉
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeNodePanel();
+      }
+    });
+
+    // ============================================================
+    // HTML 安全轉義（防 XSS）
+    // ============================================================
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    // ============================================================
+    // Hero panel 數字 count-up（頁面載入後立即執行）
+    // ============================================================
+    (function initHeroCountUp() {
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var heroCountEls = document.querySelectorAll('.hero__panel-card .count-num[data-target]');
+      if (!heroCountEls.length) return;
+
+      // 延遲 800ms 再開始，製造「系統啟動」感
+      setTimeout(function () {
+        heroCountEls.forEach(function (el) {
+          var target = parseInt(el.dataset.target, 10);
+          var prefix = el.dataset.prefix || '';
+          var suffix = el.dataset.suffix || '';
+
+          if (prefersReduced) {
+            el.textContent = prefix + target + suffix;
+            return;
+          }
+
+          var duration = 1200;
+          var startTime = performance.now();
+
+          function update(currentTime) {
+            var elapsed = currentTime - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = Math.round(eased * target);
+            el.textContent = prefix + current + suffix;
+            if (progress < 1) {
+              requestAnimationFrame(update);
+            }
+          }
+
+          requestAnimationFrame(update);
+        });
+      }, 800);
+    })();
+  </script>
+
+</body>
+</html>

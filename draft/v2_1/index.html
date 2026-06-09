@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.CHOU.SYS | ATC Command Center</title>
+  <meta name="description" content="Frank Chou: AI SaaS Builder x Enterprise PM. 7 年 B2B 系統落地 × 5 個親手打造的 AI SaaS 產品。">
+  <meta name="keywords" content="AI SaaS Architecture, B2B Enterprise PM, LLM Prompt Engineering, Vision AI Integration, SAP Data Pipeline, Frank Chou">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* =====================================================
+       DESIGN TOKENS — v2_1
+    ===================================================== */
+    :root {
+      /* Background system (art-direction: 3-layer) */
+      --bg-base:           #080C10;
+      --bg-surface:        #0D1520;
+      --bg-elevated:       #1A2535;
+
+      /* Accent colors — only 3 allowed: cyan / amber / green */
+      --accent-cyan:       #0EA5E9;
+      --accent-amber:      #D97706;
+      --accent-green:      #22D3A0;
+
+      /* Art-direction art tokens (higher saturation variants for glow effects) */
+      --color-cyan:        #00f5d4;
+      --color-amber:       #f5a623;
+      --color-green:       #39ff14;
+      --color-cyan-dim:    rgba(0,245,212,0.10);
+      --color-cyan-glow:   rgba(0,245,212,0.25);
+      --color-amber-dim:   rgba(245,166,35,0.15);
+      --color-amber-glow:  rgba(245,166,35,0.30);
+      --color-green-dim:   rgba(57,255,20,0.10);
+      --color-green-glow:  rgba(57,255,20,0.20);
+
+      /* Text */
+      --text-primary:      #F0F4F8;
+      --text-secondary:    #8899AA;
+      --text-dim:          #445566;
+
+      /* Borders */
+      --border-subtle:     rgba(255,255,255,0.08);
+      --border-glow-cyan:  rgba(14,165,233,0.35);
+      --border-glow-amber: rgba(217,119,6,0.35);
+      --border-glow-green: rgba(34,211,160,0.35);
+
+      /* Backward-compat glow helpers */
+      --cyan-glow:         rgba(14,165,233,0.2);
+      --amber-glow:        rgba(217,119,6,0.2);
+      --green-glow:        rgba(34,211,160,0.15);
+
+      /* Layout */
+      --nav-height:        48px;
+      --status-height:     36px;
+      --col-left:          24%;
+      --col-mid:           52%;
+      --col-right:         24%;
+    }
+
+    /* =====================================================
+       RESET & BASE
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      /* Art-direction: 3-layer background */
+      background-color: #0a0a0f;
+      background-image:
+        /* Layer 3: radial ambient glow */
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,245,212,0.03) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 80%, rgba(245,166,35,0.04) 0%, transparent 60%),
+        /* Layer 2: dot-grid (art-direction spec: 2.5% opacity, 48px) */
+        linear-gradient(rgba(0,245,212,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,212,0.025) 1px, transparent 1px);
+      background-size: auto, auto, 48px 48px, 48px 48px;
+    }
+
+    /* =====================================================
+       LAYOUT SHELL
+    ===================================================== */
+    .atc-shell {
+      display: grid;
+      grid-template-rows: var(--nav-height) 1fr var(--status-height);
+      min-height: 100dvh;
+    }
+
+    /* =====================================================
+       TOP NAV
+    ===================================================== */
+    .atc-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: var(--nav-height);
+      background: rgba(10,10,15,0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,245,212,0.08);
+      box-shadow: 0 -2px 0 0 var(--color-cyan) inset,
+                  0 1px 0 0 rgba(255,255,255,0.04);
+    }
+    .nav-left {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--accent-cyan);
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--color-cyan);
+      box-shadow: 0 0 8px var(--color-cyan);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .nav-center {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.12em;
+    }
+    .nav-right {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+    }
+
+    /* =====================================================
+       MAIN BODY — THREE COLUMNS
+    ===================================================== */
+    .atc-main {
+      display: grid;
+      grid-template-columns: var(--col-left) var(--col-mid) var(--col-right);
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* =====================================================
+       COLUMN SHARED
+    ===================================================== */
+    .col-left,
+    .col-right {
+      background: rgba(13,21,32,0.6);
+      border-right: 1px solid rgba(0,245,212,0.08);
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .col-right {
+      border-right: none;
+      border-left: 1px solid rgba(0,245,212,0.08);
+    }
+    .col-mid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px 8px;
+      position: relative;
+    }
+
+    /* =====================================================
+       SECTION HEADERS
+    ===================================================== */
+    .section-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0,245,212,0.2);
+      margin-bottom: 4px;
+    }
+
+    /* =====================================================
+       RIGHT COL — B2B KPI BLOCK (首屏最上方)
+    ===================================================== */
+    .kpi-block {
+      background: rgba(13,21,32,0.7);
+      border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 0 24px rgba(245,166,35,0.06);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .kpi-card {
+      background: rgba(8,12,16,0.8);
+      border: 1px solid rgba(245,166,35,0.15);
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+    }
+    .kpi-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-amber);
+      line-height: 1.1;
+      /* count-up numeric glow */
+      text-shadow: 0 0 12px rgba(245,166,35,0.5);
+    }
+    .kpi-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 3px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* =====================================================
+       LEFT COL — PROJECT DISPATCH
+    ===================================================== */
+    .dispatch-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .dispatch-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(13,21,32,0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease-out, border-color 0.2s ease-out, transform 0.15s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    .dispatch-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(0,245,212,0.04));
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+    }
+    .dispatch-item:hover {
+      background: rgba(26,37,53,0.9);
+      border-color: rgba(0,245,212,0.3);
+      transform: translateX(2px);
+    }
+    .dispatch-item:hover::before { opacity: 1; }
+    .dispatch-item.active {
+      background: rgba(0,245,212,0.06);
+      border-color: rgba(0,245,212,0.4);
+    }
+    .dispatch-item:focus-visible {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 2px;
+    }
+
+    .item-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .item-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      opacity: 0.3;
+    }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-subtitle {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 1px;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* STATUS BADGES — 依狀態分色 */
+    .status-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    /* APPROACHING → cyan 閃爍 */
+    .badge-approaching {
+      background: rgba(0,245,212,0.10);
+      color: var(--color-cyan);
+      border: 1px solid rgba(0,245,212,0.35);
+      animation: badge-pulse 1.8s ease-in-out infinite;
+    }
+    /* STANDBY → amber */
+    .badge-standby {
+      background: rgba(245,166,35,0.12);
+      color: var(--color-amber);
+      border: 1px solid rgba(245,166,35,0.3);
+    }
+    /* TERMINAL 1 → green */
+    .badge-terminal {
+      background: rgba(57,255,20,0.08);
+      color: var(--color-green);
+      border: 1px solid rgba(57,255,20,0.25);
+    }
+    /* INBOUND → cyan 閃爍 */
+    .badge-inbound {
+      background: rgba(0,245,212,0.10);
+      color: var(--color-cyan);
+      border: 1px solid rgba(0,245,212,0.35);
+      animation: badge-pulse 2.4s ease-in-out infinite;
+    }
+    /* ACTIVE → green 發光 */
+    .badge-active {
+      background: rgba(57,255,20,0.12);
+      color: var(--color-green);
+      border: 1px solid rgba(57,255,20,0.35);
+      box-shadow: 0 0 10px rgba(57,255,20,0.3);
+      animation: badge-pulse 2s ease-in-out infinite;
+    }
+
+    /* system health indicator */
+    .dispatch-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .health-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-green);
+      box-shadow: 0 0 6px var(--color-green);
+      animation: badge-pulse 2s ease-in-out infinite;
+    }
+    .health-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--color-green);
+      letter-spacing: 0.1em;
+    }
+
+    /* =====================================================
+       MIDDLE COL — HERO + GLOBE
+    ===================================================== */
+    .mid-hero {
+      text-align: center;
+      padding: 0 8px 8px;
+      width: 100%;
+    }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(16px, 1.8vw, 26px);
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .hero-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(10px, 1vw, 12px);
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 8px 20px;
+      border: 1.5px solid var(--color-cyan);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--color-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 14px var(--color-cyan-glow);
+      transition: background 0.2s ease-out, color 0.2s ease-out, box-shadow 0.2s ease-out;
+      text-decoration: none;
+    }
+    .cta-btn:hover {
+      background: var(--color-cyan);
+      color: #0a0a0f;
+      box-shadow: 0 0 28px rgba(0,245,212,0.5);
+    }
+    .cta-btn:focus-visible {
+      outline: 2px solid var(--color-cyan);
+      outline-offset: 3px;
+    }
+
+    /* globe meta */
+    .globe-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-align: center;
+      margin: 4px 0;
+    }
+    .globe-meta span { color: var(--color-green); }
+
+    /* =====================================================
+       GLOBE SVG CONTAINER
+       Art-direction: "雷達任務空間" upgrade
+    ===================================================== */
+    .globe-wrapper {
+      position: relative;
+      width: 360px;
+      height: 360px;
+      flex-shrink: 0;
+    }
+
+    /* outer scan rings */
+    .scan-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(0,245,212,0.12);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .scan-ring-1 {
+      width: 100%; height: 100%;
+      animation: ring-rotate 10s linear infinite;
+    }
+    .scan-ring-2 {
+      width: 86%; height: 86%;
+      border-style: dotted;
+      animation: ring-rotate 16s linear infinite reverse;
+    }
+
+    /* globe SVG */
+    .globe-svg {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      overflow: visible;
+      /* Art-direction: globe glow */
+      filter: drop-shadow(0 0 20px rgba(0,245,212,0.08))
+              drop-shadow(0 0 40px rgba(0,245,212,0.04));
+    }
+
+    /* flight arc tooltip — hover only */
+    .arc-tooltip {
+      position: absolute;
+      background: rgba(10,10,15,0.92);
+      border: 1px solid rgba(0,245,212,0.35);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--color-cyan);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease-out;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    /* =====================================================
+       RIGHT COL SECTIONS
+    ===================================================== */
+    .right-section {
+      background: rgba(13,21,32,0.5);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    /* GLOBAL NETWORK mini map */
+    .network-map {
+      width: 100%;
+      height: 80px;
+      position: relative;
+    }
+    .network-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ACHIEVEMENTS */
+    .achievement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .achievement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(8,12,16,0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease-out, border-color 0.2s ease-out;
+    }
+    .achievement-item:hover {
+      background: var(--bg-elevated);
+      border-color: rgba(245,166,35,0.3);
+    }
+    .achievement-item:focus-visible {
+      outline: 2px solid var(--color-amber);
+      outline-offset: 2px;
+    }
+    .achievement-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .achievement-info { flex: 1; }
+    .achievement-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .achievement-sub {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+    .achievement-detail {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      max-height: 0;
+      overflow: hidden;
+      /* Only transition opacity/transform, not max-height width */
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    }
+    .achievement-item.expanded .achievement-detail {
+      max-height: 120px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* TECH STACK — unified to design tokens only (no purple) */
+    .tech-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .tech-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      background: rgba(8,12,16,0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: default;
+      transition: border-color 0.15s ease-out, color 0.15s ease-out, box-shadow 0.15s ease-out;
+    }
+    .tech-pill:hover {
+      color: var(--text-primary);
+      border-color: rgba(0,245,212,0.35);
+      box-shadow: 0 0 8px var(--color-cyan-glow);
+    }
+    .pill-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* PRODUCT DETAIL PANEL */
+    .product-detail {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .product-detail.visible { display: flex; }
+
+    .detail-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--color-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      padding: 0;
+      letter-spacing: 0.08em;
+      transition: opacity 0.15s ease-out;
+    }
+    .detail-back:hover { opacity: 0.7; }
+    .detail-back:focus-visible { outline: 2px solid var(--color-cyan); }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .detail-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .detail-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+    .detail-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-left: 2px solid rgba(0,245,212,0.3);
+      padding-left: 10px;
+    }
+    .detail-tech-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .detail-tag {
+      padding: 3px 8px;
+      background: rgba(0,245,212,0.07);
+      border: 1px solid rgba(0,245,212,0.2);
+      border-radius: 4px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--color-cyan);
+    }
+    .detail-metric {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .detail-metric-card {
+      background: rgba(8,12,16,0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+    }
+    .detail-metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-amber);
+    }
+    .detail-metric-key {
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* =====================================================
+       STATUS BAR
+    ===================================================== */
+    .atc-statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 24px;
+      height: var(--status-height);
+      background: rgba(10,10,15,0.85);
+      border-top: 1px solid rgba(0,245,212,0.1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      overflow: hidden;
+      animation: status-blink 8s linear infinite;
+    }
+    .status-item { white-space: nowrap; }
+    .status-sep {
+      color: rgba(0,245,212,0.2);
+    }
+    .status-cursor {
+      display: inline-block;
+      width: 7px; height: 11px;
+      background: var(--color-cyan);
+      vertical-align: middle;
+      animation: cursor-blink 1s steps(1) infinite;
+      margin-left: 4px;
+    }
+
+    /* =====================================================
+       ANIMATIONS
+       Only transform / opacity / stroke-dashoffset used.
+       No width / top / left / height keyframe values.
+    ===================================================== */
+    @keyframes ring-rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to   { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+    @keyframes badge-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.5; }
+    }
+    @keyframes cursor-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    /* Art-direction: arc-flow (stroke-dashoffset only, 3s loop) */
+    @keyframes arc-flow {
+      0%   { stroke-dashoffset: 48; }
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes globe-glow-pulse {
+      0%, 100% { opacity: 0.85; }
+      50%       { opacity: 1; }
+    }
+    @keyframes node-blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(1.3); }
+    }
+    @keyframes node-pulse-active {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.8; transform: scale(1.5); }
+    }
+    @keyframes status-blink {
+      0%, 94%  { opacity: 0.6; }
+      95%, 99% { opacity: 0.9; }
+      100%     { opacity: 0.6; }
+    }
+    /* count-up fade-in */
+    @keyframes countup-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =====================================================
+       prefers-reduced-motion
+    ===================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* =====================================================
+       RWD — MOBILE
+    ===================================================== */
+    @media (max-width: 768px) {
+      .atc-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        overflow: visible;
+      }
+      .col-left, .col-right {
+        border: none;
+        border-bottom: 1px solid rgba(0,245,212,0.08);
+      }
+      .globe-wrapper {
+        width: 240px;
+        height: 240px;
+      }
+      .globe-svg {
+        width: 190px;
+        height: 190px;
+      }
+      .hero-title { font-size: 15px; }
+      .atc-statusbar {
+        gap: 10px;
+        font-size: 8px;
+        justify-content: flex-start;
+        overflow-x: auto;
+      }
+      .atc-nav {
+        padding: 0 14px;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .globe-wrapper { width: 220px; height: 220px; }
+      .globe-svg { width: 170px; height: 170px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="atc-shell">
+
+  <!-- ===== TOP NAV ===== -->
+  <nav class="atc-nav" role="banner">
+    <div class="nav-left">
+      <span class="nav-dot" aria-hidden="true"></span>
+      <span>COMMAND CENTER</span>
+    </div>
+    <div class="nav-center">MY PORTFOLIO</div>
+    <div class="nav-right">F.CHOU.SYS</div>
+  </nav>
+
+  <!-- ===== MAIN THREE COLUMNS ===== -->
+  <main class="atc-main" role="main">
+
+    <!-- === LEFT: PROJECT DISPATCH === -->
+    <section class="col-left" aria-label="Project Dispatch">
+      <div class="section-header">PROJECT DISPATCH</div>
+
+      <div class="dispatch-list" role="list">
+
+        <div class="dispatch-item" role="listitem button" tabindex="0"
+             data-product="0"
+             aria-label="AI Hunter: APPROACHING"
+             onclick="selectProduct(0)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct(0)">
+          <!-- dot: cyan (APPROACHING) -->
+          <span class="item-dot" style="background:var(--color-cyan);color:var(--color-cyan);box-shadow:0 0 8px rgba(0,245,212,0.6);" aria-hidden="true"></span>
+          <div class="item-info">
+            <div class="item-name">AI Hunter</div>
+            <div class="item-subtitle">求職加速器</div>
+          </div>
+          <span class="status-badge badge-approaching" role="status">APPROACHING</span>
+        </div>
+
+        <div class="dispatch-item" role="listitem button" tabindex="0"
+             data-product="1"
+             aria-label="尋物小精靈: STANDBY"
+             onclick="selectProduct(1)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct(1)">
+          <!-- dot: amber (STANDBY) -->
+          <span class="item-dot" style="background:var(--color-amber);color:var(--color-amber);box-shadow:0 0 8px rgba(245,166,35,0.5);" aria-hidden="true"></span>
+          <div class="item-info">
+            <div class="item-name">尋物小精靈</div>
+            <div class="item-subtitle">智慧物品管理</div>
+          </div>
+          <span class="status-badge badge-standby" role="status">STANDBY</span>
+        </div>
+
+        <div class="dispatch-item" role="listitem button" tabindex="0"
+             data-product="2"
+             aria-label="DailyLumos: TERMINAL 1"
+             onclick="selectProduct(2)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct(2)">
+          <!-- dot: green (TERMINAL 1) -->
+          <span class="item-dot" style="background:var(--color-green);color:var(--color-green);box-shadow:0 0 8px rgba(57,255,20,0.5);" aria-hidden="true"></span>
+          <div class="item-info">
+            <div class="item-name">DailyLumos</div>
+            <div class="item-subtitle">每日靈性箴言</div>
+          </div>
+          <span class="status-badge badge-terminal" role="status">TERMINAL 1</span>
+        </div>
+
+        <div class="dispatch-item" role="listitem button" tabindex="0"
+             data-product="3"
+             aria-label="VocalCanvas: INBOUND"
+             onclick="selectProduct(3)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct(3)">
+          <!-- dot: cyan (INBOUND) — purple removed, replaced with cyan -->
+          <span class="item-dot" style="background:var(--color-cyan);color:var(--color-cyan);box-shadow:0 0 8px rgba(0,245,212,0.5);" aria-hidden="true"></span>
+          <div class="item-info">
+            <div class="item-name">VocalCanvas</div>
+            <div class="item-subtitle">文字轉語音工具</div>
+          </div>
+          <span class="status-badge badge-inbound" role="status">INBOUND</span>
+        </div>
+
+        <div class="dispatch-item" role="listitem button" tabindex="0"
+             data-product="4"
+             aria-label="無敏毛孩: ACTIVE"
+             onclick="selectProduct(4)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')selectProduct(4)">
+          <!-- dot: green (ACTIVE) -->
+          <span class="item-dot" style="background:var(--color-green);color:var(--color-green);box-shadow:0 0 10px rgba(57,255,20,0.8);" aria-hidden="true"></span>
+          <div class="item-info">
+            <div class="item-name">無敏毛孩</div>
+            <div class="item-subtitle">寵物營養分析</div>
+          </div>
+          <span class="status-badge badge-active" role="status">ACTIVE</span>
+        </div>
+
+      </div><!-- /dispatch-list -->
+
+      <div class="dispatch-footer" aria-label="System health indicator">
+        <span class="health-dot" aria-hidden="true"></span>
+        <span class="health-label">SYSTEM HEALTH: OPTIMAL</span>
+      </div>
+    </section><!-- /col-left -->
+
+    <!-- === MIDDLE: GLOBE (雷達任務空間) === -->
+    <section class="col-mid" aria-label="Global Operations Radar">
+
+      <!-- Hero text -->
+      <div class="mid-hero">
+        <h1 class="hero-title">MANAGING CHAOS, GUIDING INNOVATION.</h1>
+        <p class="hero-sub">Frank Chou &mdash; AI SaaS Builder &times; Enterprise PM</p>
+        <a href="mailto:contact@fchou.dev" class="cta-btn" aria-label="Request collaboration with Frank Chou">REQUEST COLLABORATION</a>
+      </div>
+
+      <p class="globe-meta">SYSTEM HEALTH: <span>OPTIMAL</span></p>
+
+      <!-- Globe: 雷達任務空間 -->
+      <div class="globe-wrapper" role="img" aria-label="Interactive radar showing AI product missions originating from Taiwan">
+        <!-- Scan rings -->
+        <div class="scan-ring scan-ring-1" aria-hidden="true"></div>
+        <div class="scan-ring scan-ring-2" aria-hidden="true"></div>
+
+        <!-- Globe SVG -->
+        <svg class="globe-svg" id="globe-svg" viewBox="-130 -130 260 260"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <!-- Radial gradient: art-direction Globe body (#0a0f18) -->
+            <radialGradient id="globeGrad" cx="35%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#1A2D45"/>
+              <stop offset="100%" stop-color="#0a0f18"/>
+            </radialGradient>
+            <!-- Clip to circle -->
+            <clipPath id="globeClip">
+              <circle cx="0" cy="0" r="120"/>
+            </clipPath>
+            <!-- Glow filter: art-direction spec -->
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="strong-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Globe body: art-direction bg #0a0f18 -->
+          <circle cx="0" cy="0" r="120" fill="url(#globeGrad)"
+                  stroke="rgba(0,245,212,0.30)" stroke-width="1.5"
+                  style="animation: globe-glow-pulse 4s ease-in-out infinite;"/>
+
+          <!-- Lat/Lon grid lines: art-direction spec opacity 5% -->
+          <g clip-path="url(#globeClip)" stroke="#00f5d4" stroke-width="0.5" fill="none">
+            <!-- Latitude: equator at 0.10, others 0.05 -->
+            <!-- Equator (±0°) -->
+            <ellipse cx="0" cy="0" rx="120" ry="120" opacity="0.10"/>
+            <!-- ±30° approx -->
+            <ellipse cx="0" cy="-60" rx="104" ry="20" opacity="0.05"/>
+            <ellipse cx="0" cy="60"  rx="104" ry="20" opacity="0.05"/>
+            <!-- ±60° approx -->
+            <ellipse cx="0" cy="-100" rx="63" ry="12" opacity="0.05"/>
+            <ellipse cx="0" cy="100"  rx="63" ry="12" opacity="0.05"/>
+            <!-- Longitude meridians: 0.05 -->
+            <ellipse cx="0" cy="0" rx="20" ry="120" opacity="0.05"/>
+            <ellipse cx="0" cy="0" rx="50" ry="120" opacity="0.05"/>
+            <ellipse cx="0" cy="0" rx="85" ry="120" opacity="0.05"/>
+            <ellipse cx="0" cy="0" rx="110" ry="120" opacity="0.05"/>
+          </g>
+
+          <!-- Continent outlines: art-direction spec rgba(14,165,233,0.06) fill, rgba(0,245,212,0.15) stroke -->
+          <g clip-path="url(#globeClip)"
+             fill="rgba(14,165,233,0.06)"
+             stroke="rgba(0,245,212,0.15)"
+             stroke-width="1"
+             stroke-linecap="round"
+             opacity="1">
+            <!-- Asia / East Asia -->
+            <path d="M30,-40 L55,-55 L80,-45 L95,-20 L90,10 L70,30 L50,40 L35,30 L20,10 L25,-20 Z"/>
+            <!-- Southeast Asia peninsula -->
+            <path d="M55,30 L65,50 L55,70 L48,55 L52,40 Z"/>
+            <!-- Europe / West -->
+            <path d="M-30,-55 L-5,-65 L10,-55 L5,-40 L-10,-35 L-30,-45 Z"/>
+            <!-- Africa -->
+            <path d="M-15,-20 L10,-25 L20,-5 L15,30 L0,55 L-15,40 L-20,15 L-25,0 Z"/>
+            <!-- Americas (west) -->
+            <path d="M-95,-50 L-70,-55 L-60,-35 L-65,-10 L-75,10 L-90,5 L-100,-20 Z"/>
+            <path d="M-80,15 L-65,10 L-55,25 L-60,50 L-75,60 L-85,45 L-82,30 Z"/>
+            <!-- Australia -->
+            <path d="M75,45 L100,40 L110,60 L95,75 L75,70 L68,55 Z"/>
+          </g>
+
+          <!-- Equator dashed line -->
+          <ellipse cx="0" cy="0" rx="120" ry="120" fill="none"
+                   clip-path="url(#globeClip)"
+                   stroke="rgba(0,245,212,0.18)" stroke-width="0.6"
+                   stroke-dasharray="4,4"/>
+
+          <!--
+            Flight arc paths: art-direction spec
+            stroke-dasharray: 8 4 (8px dash, 4px gap)
+            animation: arc-flow 3s linear infinite (stroke-dashoffset only)
+            VocalCanvas arc changed from purple (#818CF8) to cyan
+          -->
+          <!-- Arc 0: AI Hunter — Taiwan to North America (cyan, APPROACHING) -->
+          <path id="arc-0" d="M68,-22 Q0,-110 -80,-40"
+                fill="none" stroke="#00f5d4" stroke-width="1.5"
+                stroke-dasharray="8,4" stroke-linecap="round"
+                style="animation: arc-flow 3s linear infinite;"
+                opacity="0.6"/>
+          <!-- Arc 1: 尋物小精靈 — Taiwan to Europe (amber, STANDBY) -->
+          <path id="arc-1" d="M68,-22 Q30,-80 -15,-50"
+                fill="none" stroke="#f5a623" stroke-width="1.5"
+                stroke-dasharray="8,4" stroke-linecap="round"
+                style="animation: arc-flow 4s linear infinite 0.8s;"
+                opacity="0.6"/>
+          <!-- Arc 2: DailyLumos — Taiwan to Australia (green, TERMINAL 1) -->
+          <path id="arc-2" d="M68,-22 Q100,20 88,58"
+                fill="none" stroke="#39ff14" stroke-width="1.5"
+                stroke-dasharray="8,4" stroke-linecap="round"
+                style="animation: arc-flow 3.5s linear infinite 0.4s;"
+                opacity="0.6"/>
+          <!-- Arc 3: VocalCanvas — Taiwan to SE Asia (cyan, INBOUND — purple removed) -->
+          <path id="arc-3" d="M68,-22 Q70,10 60,42"
+                fill="none" stroke="#00f5d4" stroke-width="1.5"
+                stroke-dasharray="8,4" stroke-linecap="round"
+                style="animation: arc-flow 3s linear infinite 1.2s;"
+                opacity="0.6"/>
+          <!-- Arc 4: 無敏毛孩 — Taiwan to Japan/NE Asia (green ACTIVE, amber highlight per art-dir ACTIVE spec) -->
+          <path id="arc-4" d="M68,-22 Q90,-35 80,-55"
+                fill="none" stroke="#f5a623" stroke-width="2"
+                stroke-dasharray="8,4" stroke-linecap="round"
+                style="animation: arc-flow 2.5s linear infinite 0.6s;"
+                opacity="0.75"/>
+
+          <!--
+            Destination markers: art-direction spec
+            3–5px radius, color by status, glow filter
+            animateMotion: light dots travel along arcs
+          -->
+
+          <!-- Arc 0 destination: North America (cyan, APPROACHING 4px) -->
+          <circle cx="-80" cy="-40" r="4" fill="#00f5d4" opacity="0.8" filter="url(#glow)"/>
+          <!-- travelling dot along arc 0 -->
+          <circle r="4" fill="#00f5d4" filter="url(#glow)" opacity="0.9">
+            <animateMotion dur="3s" repeatCount="indefinite" rotate="auto">
+              <mpath href="#arc-0"/>
+            </animateMotion>
+          </circle>
+
+          <!-- Arc 1 destination: Europe (amber, STANDBY 3px) -->
+          <circle cx="-15" cy="-50" r="3" fill="#f5a623" opacity="0.7" filter="url(#glow)"/>
+          <!-- travelling dot along arc 1 -->
+          <circle r="3" fill="#f5a623" filter="url(#glow)" opacity="0.8">
+            <animateMotion dur="4s" repeatCount="indefinite" rotate="auto" begin="0.8s">
+              <mpath href="#arc-1"/>
+            </animateMotion>
+          </circle>
+
+          <!-- Arc 2 destination: Australia (green, TERMINAL 1, 3px) -->
+          <circle cx="88"  cy="58"  r="3" fill="#39ff14" opacity="0.7" filter="url(#glow)"/>
+          <!-- travelling dot along arc 2 -->
+          <circle r="3" fill="#39ff14" filter="url(#glow)" opacity="0.8">
+            <animateMotion dur="3.5s" repeatCount="indefinite" rotate="auto" begin="0.4s">
+              <mpath href="#arc-2"/>
+            </animateMotion>
+          </circle>
+
+          <!-- Arc 3 destination: SE Asia (cyan, INBOUND 4px) -->
+          <circle cx="60"  cy="42"  r="4" fill="#00f5d4" opacity="0.7" filter="url(#glow)"/>
+          <!-- travelling dot along arc 3 -->
+          <circle r="4" fill="#00f5d4" filter="url(#glow)" opacity="0.9">
+            <animateMotion dur="3s" repeatCount="indefinite" rotate="auto" begin="1.2s">
+              <mpath href="#arc-3"/>
+            </animateMotion>
+          </circle>
+
+          <!-- Arc 4 destination: Japan (green/active 5px, art-dir ACTIVE = largest) -->
+          <circle cx="80"  cy="-55" r="5" fill="#39ff14" opacity="0.9" filter="url(#strong-glow)"
+                  style="animation: node-pulse-active 1.2s ease-in-out infinite;"/>
+          <!-- travelling dot along arc 4 (active) -->
+          <circle r="5" fill="#39ff14" filter="url(#strong-glow)" opacity="1">
+            <animateMotion dur="2.5s" repeatCount="indefinite" rotate="auto" begin="0.6s">
+              <mpath href="#arc-4"/>
+            </animateMotion>
+          </circle>
+
+          <!-- Taiwan base marker (主基地發光點) -->
+          <circle id="taiwan-marker" cx="68" cy="-22" r="5" fill="#00f5d4"
+                  filter="url(#strong-glow)"
+                  style="animation: node-blink 2s ease-in-out infinite;"/>
+          <circle cx="68" cy="-22" r="10" fill="none"
+                  stroke="#00f5d4" stroke-width="1" opacity="0.3"
+                  style="animation: badge-pulse 2s ease-in-out infinite;"/>
+          <!-- TW label: no text on globe by default — tooltip-only per ui spec -->
+          <!-- (keeping minimal TW marker text as it's a location anchor, not data text) -->
+          <text x="72" y="-27" font-family="JetBrains Mono,monospace" font-size="7"
+                fill="#00f5d4" opacity="0.7">TW</text>
+
+          <!-- Active product highlight ring (hidden by default) -->
+          <circle id="active-ring" cx="68" cy="-22" r="0" fill="none"
+                  stroke="#00f5d4" stroke-width="2" opacity="0"
+                  style="transition: opacity 0.3s ease-out;"/>
+        </svg>
+
+        <!-- Tooltip: arc hover shows product name -->
+        <div class="arc-tooltip" id="arc-tooltip" role="tooltip"></div>
+      </div><!-- /globe-wrapper -->
+
+      <p class="globe-meta">CONNECTED NODES: <span>5</span> &nbsp;|&nbsp; ORIGIN: TAIWAN</p>
+
+    </section><!-- /col-mid -->
+
+    <!-- === RIGHT: PANELS === -->
+    <aside class="col-right" aria-label="B2B KPI, Global Network and Achievements">
+
+      <!-- Default right content -->
+      <div id="right-default">
+
+        <!-- B2B KPI BLOCK: 首屏最上方，首屏可見 -->
+        <div class="kpi-block" aria-label="B2B KPI 企業戰績">
+          <div class="section-header" style="color:var(--color-amber);border-bottom-color:rgba(245,166,35,0.25);">B2B KPI</div>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-val" id="kpi-time" aria-label="時間成本降低97%">-97%</div>
+              <div class="kpi-label">時間成本</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-val" id="kpi-efficiency" aria-label="對接效率提升60%">+60%</div>
+              <div class="kpi-label">對接效率</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-val" id="kpi-accuracy" aria-label="數據正確性100%">100%</div>
+              <div class="kpi-label">數據正確性</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-val" id="kpi-scope" style="font-size:14px;" aria-label="跨2國5部門">2國5部門</div>
+              <div class="kpi-label">協作規模</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GLOBAL NETWORK -->
+        <div class="right-section">
+          <div class="section-header">GLOBAL NETWORK</div>
+          <div class="network-map" aria-label="World map showing key locations">
+            <svg class="network-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Simplified world silhouette strokes -->
+              <g fill="none" stroke="rgba(0,245,212,0.15)" stroke-width="0.6">
+                <!-- Europe -->
+                <path d="M88,25 L95,20 L102,22 L105,28 L100,32 L93,35 L88,30 Z"/>
+                <!-- Africa -->
+                <path d="M96,38 L105,36 L110,45 L108,60 L100,68 L93,60 L92,48 Z"/>
+                <!-- Asia -->
+                <path d="M108,18 L128,15 L140,20 L145,30 L140,38 L130,42 L118,40 L110,32 Z"/>
+                <!-- SE Asia -->
+                <path d="M138,38 L145,45 L140,55 L134,52 L136,44 Z"/>
+                <!-- Americas West -->
+                <path d="M28,18 L38,15 L42,25 L38,38 L30,40 L25,30 Z"/>
+                <path d="M32,45 L40,42 L44,52 L40,65 L32,68 L28,58 Z"/>
+                <!-- Australia -->
+                <path d="M148,52 L162,48 L168,58 L160,68 L148,66 L144,58 Z"/>
+              </g>
+              <!-- Location markers -->
+              <!-- Taiwan -->
+              <circle cx="143" cy="36" r="3" fill="#00f5d4"
+                      style="animation: badge-pulse 2s ease-in-out infinite;"/>
+              <text x="146" y="34" font-family="JetBrains Mono,monospace" font-size="5" fill="#00f5d4">TW</text>
+              <!-- Atos Projects (France) -->
+              <circle cx="95" cy="26" r="2.5" fill="#39ff14" opacity="0.8"
+                      style="animation: badge-pulse 3s ease-in-out infinite 0.5s;"/>
+              <text x="82" y="23" font-family="JetBrains Mono,monospace" font-size="4.5" fill="#39ff14">ATOS</text>
+              <!-- SAP Global (Germany) -->
+              <circle cx="100" cy="22" r="2.5" fill="#f5a623" opacity="0.8"
+                      style="animation: badge-pulse 3s ease-in-out infinite 1s;"/>
+              <text x="103" y="20" font-family="JetBrains Mono,monospace" font-size="4.5" fill="#f5a623">SAP</text>
+              <!-- Connection lines -->
+              <line x1="143" y1="36" x2="95" y2="26" stroke="rgba(57,255,20,0.25)" stroke-width="0.6" stroke-dasharray="3,2"/>
+              <line x1="143" y1="36" x2="100" y2="22" stroke="rgba(245,166,35,0.25)" stroke-width="0.6" stroke-dasharray="3,2"/>
+            </svg>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--color-cyan);">&#9679; Taiwan</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--color-green);">&#9679; Atos</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--color-amber);">&#9679; SAP Global</span>
+          </div>
+        </div>
+
+        <!-- ACHIEVEMENTS -->
+        <div class="right-section">
+          <div class="section-header">ACHIEVEMENTS</div>
+          <div class="achievement-list" role="list">
+
+            <div class="achievement-item" role="listitem button" tabindex="0"
+                 onclick="toggleAchievement(this)"
+                 onkeydown="if(event.key==='Enter'||event.key===' ')toggleAchievement(this)"
+                 aria-expanded="false">
+              <span class="achievement-icon" aria-hidden="true">&#127885;</span>
+              <div class="achievement-info">
+                <div class="achievement-title">PMP 國際認證</div>
+                <div class="achievement-sub">PMI · PMP | PMI-ACP | PMI-PBA</div>
+                <div class="achievement-detail">三項 PMI 國際認證，涵蓋專案管理、敏捷實踐與商業分析，具備完整的 PM 專業認證體系。</div>
+              </div>
+            </div>
+
+            <div class="achievement-item" role="listitem button" tabindex="0"
+                 onclick="toggleAchievement(this)"
+                 onkeydown="if(event.key==='Enter'||event.key===' ')toggleAchievement(this)"
+                 aria-expanded="false">
+              <span class="achievement-icon" aria-hidden="true">&#127942;</span>
+              <div class="achievement-info">
+                <div class="achievement-title">2024 Atos 優秀員工</div>
+                <div class="achievement-sub">台灣源訊 · 2024</div>
+                <div class="achievement-detail">主導 SMESA 政府 EIP 系統 0→1 建置，獲客戶高度評價，交付後立即委託後續專案。</div>
+              </div>
+            </div>
+
+            <div class="achievement-item" role="listitem button" tabindex="0"
+                 onclick="toggleAchievement(this)"
+                 onkeydown="if(event.key==='Enter'||event.key===' ')toggleAchievement(this)"
+                 aria-expanded="false">
+              <span class="achievement-icon" aria-hidden="true">&#129351;</span>
+              <div class="achievement-info">
+                <div class="achievement-title">2020 緯創黑客松第三名</div>
+                <div class="achievement-sub">緯創資通集團 · 2020</div>
+                <div class="achievement-detail">800 間會議室空間借用系統，獲執行長青睞並推行全集團，節省 97% 以上時間成本。</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CORE TECH STACK — unified to 3 design token colors: no purple/pink -->
+        <div class="right-section">
+          <div class="section-header">CORE TECH STACK</div>
+          <div class="tech-pills" role="list">
+            <!-- cyan group: JS-family, AI tech -->
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-cyan);" aria-hidden="true"></span>JavaScript</span>
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-cyan);" aria-hidden="true"></span>React</span>
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-cyan);" aria-hidden="true"></span>Vue.js</span>
+            <!-- amber group: backend/data/enterprise -->
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-amber);" aria-hidden="true"></span>PHP</span>
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-amber);" aria-hidden="true"></span>SQL</span>
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-amber);" aria-hidden="true"></span>ABAP</span>
+            <!-- green group: tools/infra -->
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-green);" aria-hidden="true"></span>Python</span>
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-green);" aria-hidden="true"></span>Git</span>
+            <span class="tech-pill" role="listitem"><span class="pill-dot" style="background:var(--color-amber);" aria-hidden="true"></span>PowerApps</span>
+          </div>
+        </div>
+
+      </div><!-- /right-default -->
+
+      <!-- Product detail panel -->
+      <div class="product-detail" id="product-detail" aria-live="polite" aria-atomic="true">
+        <button class="detail-back" onclick="closeProductDetail()"
+                aria-label="Back to default view">
+          &#8592; BACK TO NETWORK
+        </button>
+        <div class="detail-header">
+          <span class="detail-dot" id="detail-dot" aria-hidden="true"></span>
+          <div>
+            <div class="detail-name" id="detail-name"></div>
+            <div class="detail-status" id="detail-status"></div>
+          </div>
+        </div>
+        <p class="detail-desc" id="detail-desc"></p>
+        <div>
+          <div class="detail-tech-label">TECH STACK</div>
+          <div class="detail-tags" id="detail-tags"></div>
+        </div>
+        <div class="detail-metric" id="detail-metric"></div>
+      </div>
+
+    </aside><!-- /col-right -->
+
+  </main><!-- /atc-main -->
+
+  <!-- ===== BOTTOM STATUS BAR ===== -->
+  <footer class="atc-statusbar" role="contentinfo" aria-label="System status">
+    <span class="status-item" id="status-health">SYSTEM HEALTH: OPTIMAL</span>
+    <span class="status-sep" aria-hidden="true">·</span>
+    <span class="status-item">UPTIME: 7Y</span>
+    <span class="status-sep" aria-hidden="true">·</span>
+    <span class="status-item">PROJECTS DEPLOYED: 5</span>
+    <span class="status-sep" aria-hidden="true">·</span>
+    <span class="status-item" id="status-nodes">CONNECTED NODES: 125</span>
+    <span class="status-sep" aria-hidden="true">·</span>
+    <span class="status-item">ORIGIN: TAIWAN</span>
+    <span class="status-cursor" aria-hidden="true"></span>
+  </footer>
+
+</div><!-- /atc-shell -->
+
+<script>
+  /* =====================================================
+     PRODUCT DATA (v2_1: VocalCanvas color updated to cyan)
+  ===================================================== */
+  const PRODUCTS = [
+    {
+      name: 'AI Hunter',
+      subtitle: '求職加速器',
+      status: 'APPROACHING',
+      color: '#00f5d4',
+      desc: '多源數據映射 × LLM 編排引擎。整合 JD、履歷、命理盤，透過 RAG Prompt Engineering 提供個性化求職指導，一條龍涵蓋履歷撰寫到模擬面試。',
+      tags: ['LLM Orchestration', 'RAG', 'Prompt Eng.', 'Multi-source Data', 'Node.js'],
+      metrics: [
+        { val: 'RAG', key: 'Architecture' },
+        { val: '5+', key: 'AI Modules' }
+      ]
+    },
+    {
+      name: '尋物小精靈',
+      subtitle: '智慧物品管理',
+      status: 'STANDBY',
+      color: '#f5a623',
+      desc: '多終端狀態同步架構。家庭多用戶即時資料庫，處理高併發同步邏輯與物品到期提醒，適用獨居者與家庭群組管理。',
+      tags: ['Real-time Sync', 'Firebase', 'Multi-user DB', 'React Native'],
+      metrics: [
+        { val: 'RT', key: 'Sync Mode' },
+        { val: '∞', key: 'Users/Family' }
+      ]
+    },
+    {
+      name: 'DailyLumos',
+      subtitle: '每日靈性箴言',
+      status: 'TERMINAL 1',
+      color: '#39ff14',
+      desc: '語義深度檢索 × 解析系統。海量聖經文本向量化儲存，AI 確保輸出穩定性，每日抽卡 + AI 解析，幫助需要心靈依歸的用戶。',
+      tags: ['Vector DB', 'Semantic Search', 'LLM', 'Stable Output'],
+      metrics: [
+        { val: 'Vec', key: 'DB Engine' },
+        { val: '1/day', key: 'Card Limit' }
+      ]
+    },
+    {
+      name: 'VocalCanvas',
+      subtitle: '文字轉語音工具',
+      status: 'INBOUND',
+      color: '#00f5d4',
+      desc: '多模態串流最佳化。Text-to-Audio API 效能調校、語速演算法與運算成本控制，業界唯一朗讀+音樂配置，支援長短音檔一鍵生成。',
+      tags: ['TTS API', 'Stream Opt.', 'Audio Pipeline', 'Cost Control'],
+      metrics: [
+        { val: 'TTS', key: 'Core Tech' },
+        { val: '2x', key: 'Speed Range' }
+      ]
+    },
+    {
+      name: '無敏毛孩',
+      subtitle: '寵物營養分析',
+      status: 'ACTIVE',
+      color: '#39ff14',
+      desc: '視覺 AI 領域映射系統。Vision AI 影像辨識與寵物成分垂直資料庫精準 Mapping，一拍即知成分適合性，搭配飼主社群共建毛孩健康資料庫。',
+      tags: ['Vision AI', 'Domain Mapping', 'Image Recognition', 'Community'],
+      metrics: [
+        { val: 'AI', key: 'Vision Engine' },
+        { val: '<1s', key: 'Analysis Time' }
+      ]
+    }
+  ];
+
+  /* =====================================================
+     GLOBE ARC HIGHLIGHT — product selection
+  ===================================================== */
+  let activeProduct = null;
+
+  function selectProduct(idx) {
+    const items = document.querySelectorAll('.dispatch-item');
+    items.forEach((el, i) => {
+      el.classList.toggle('active', i === idx);
+      el.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
+    });
+
+    // Highlight arc on globe: active arc full opacity, others dimmed
+    const arcs = document.querySelectorAll('[id^="arc-"]');
+    arcs.forEach((arc, i) => {
+      arc.style.opacity = (i === idx) ? '1' : '0.18';
+      arc.style.strokeWidth = (i === idx) ? '2.5' : '1.5';
+    });
+
+    // Animate the active ring on Taiwan origin
+    const ring = document.getElementById('active-ring');
+    ring.setAttribute('r', '16');
+    ring.style.opacity = '0.6';
+    ring.setAttribute('stroke', PRODUCTS[idx].color);
+    setTimeout(() => {
+      ring.setAttribute('r', '8');
+      ring.style.opacity = '0.3';
+    }, 400);
+
+    showProductDetail(idx);
+    activeProduct = idx;
+  }
+
+  function showProductDetail(idx) {
+    const p = PRODUCTS[idx];
+    document.getElementById('right-default').style.display = 'none';
+    const panel = document.getElementById('product-detail');
+    panel.classList.add('visible');
+
+    document.getElementById('detail-dot').style.cssText =
+      `background:${p.color};box-shadow:0 0 10px ${p.color};width:12px;height:12px;border-radius:50%;flex-shrink:0;`;
+    document.getElementById('detail-name').textContent = p.name;
+    document.getElementById('detail-status').textContent = `STATUS: ${p.status} · ${p.subtitle}`;
+    document.getElementById('detail-desc').textContent = p.desc;
+
+    const tagsEl = document.getElementById('detail-tags');
+    tagsEl.innerHTML = p.tags.map(t =>
+      `<span class="detail-tag">${t}</span>`
+    ).join('');
+
+    const metricEl = document.getElementById('detail-metric');
+    metricEl.innerHTML = p.metrics.map(m =>
+      `<div class="detail-metric-card">
+         <div class="detail-metric-val">${m.val}</div>
+         <div class="detail-metric-key">${m.key}</div>
+       </div>`
+    ).join('');
+  }
+
+  function closeProductDetail() {
+    document.getElementById('right-default').style.display = '';
+    const panel = document.getElementById('product-detail');
+    panel.classList.remove('visible');
+
+    // Reset arc highlights
+    const arcs = document.querySelectorAll('[id^="arc-"]');
+    arcs.forEach(arc => {
+      arc.style.opacity = '';
+      arc.style.strokeWidth = '';
+    });
+
+    // Reset dispatch items
+    const items = document.querySelectorAll('.dispatch-item');
+    items.forEach(el => {
+      el.classList.remove('active');
+      el.removeAttribute('aria-pressed');
+    });
+
+    activeProduct = null;
+
+    const ring = document.getElementById('active-ring');
+    ring.setAttribute('r', '0');
+    ring.style.opacity = '0';
+  }
+
+  /* =====================================================
+     ACHIEVEMENT TOGGLE
+  ===================================================== */
+  function toggleAchievement(el) {
+    const isExpanded = el.classList.toggle('expanded');
+    el.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+  }
+
+  /* =====================================================
+     ARC TOOLTIP (hover only — no labels on globe by default)
+  ===================================================== */
+  const arcLabels = ['AI Hunter', '尋物小精靈', 'DailyLumos', 'VocalCanvas', '無敏毛孩'];
+  const tooltip = document.getElementById('arc-tooltip');
+
+  document.querySelectorAll('[id^="arc-"]').forEach((arc, i) => {
+    arc.style.cursor = 'pointer';
+    arc.addEventListener('mouseenter', (e) => {
+      tooltip.textContent = arcLabels[i];
+      tooltip.style.opacity = '1';
+      positionTooltip(e);
+    });
+    arc.addEventListener('mousemove', positionTooltip);
+    arc.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+    });
+    arc.addEventListener('click', () => selectProduct(i));
+  });
+
+  function positionTooltip(e) {
+    const wrapper = document.querySelector('.globe-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left + 10;
+    const y = e.clientY - rect.top - 28;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+  }
+
+  /* =====================================================
+     STATUS BAR TICKER
+  ===================================================== */
+  const statusMessages = [
+    { id: 'status-health', messages: ['SYSTEM HEALTH: OPTIMAL', 'SYSTEM HEALTH: NOMINAL', 'SYSTEM HEALTH: OPTIMAL'] },
+    { id: 'status-nodes', messages: ['CONNECTED NODES: 125', 'CONNECTED NODES: 127', 'CONNECTED NODES: 125'] }
+  ];
+  let tickIdx = 0;
+  setInterval(() => {
+    tickIdx = (tickIdx + 1) % 3;
+    statusMessages.forEach(item => {
+      const el = document.getElementById(item.id);
+      if (el) el.textContent = item.messages[tickIdx];
+    });
+  }, 5000);
+
+  /* =====================================================
+     KEYBOARD: ESC to close product detail
+  ===================================================== */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && activeProduct !== null) {
+      closeProductDetail();
+    }
+  });
+
+  /* =====================================================
+     B2B KPI COUNT-UP ANIMATION
+     Respects prefers-reduced-motion
+  ===================================================== */
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animateCountUp(el, finalText, duration) {
+    if (prefersReducedMotion) {
+      el.textContent = finalText;
+      return;
+    }
+    // Extract numeric part and suffix/prefix
+    const match = finalText.match(/^([+\-]?)(\d+)(%?)(.*)$/);
+    if (!match) {
+      el.textContent = finalText;
+      return;
+    }
+    const prefix = match[1];
+    const target = parseInt(match[2], 10);
+    const suffix = match[3] + match[4];
+    const start = performance.now();
+    el.style.animation = 'countup-in 0.4s ease-out both';
+
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutQuart
+      const eased = 1 - Math.pow(1 - progress, 4);
+      const current = Math.round(eased * target);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = finalText;
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
+  // Trigger count-up when KPI block is visible (IntersectionObserver)
+  const kpiBlock = document.querySelector('.kpi-block');
+  const kpiTargets = [
+    { id: 'kpi-time',       final: '-97%',     duration: 1200 },
+    { id: 'kpi-efficiency', final: '+60%',      duration: 1000 },
+    { id: 'kpi-accuracy',   final: '100%',      duration: 900  },
+    { id: 'kpi-scope',      final: '2國5部門',  duration: 0    }
+  ];
+
+  let kpiAnimated = false;
+  if ('IntersectionObserver' in window && kpiBlock) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !kpiAnimated) {
+          kpiAnimated = true;
+          // Stagger each KPI by 120ms
+          kpiTargets.forEach((kpi, i) => {
+            setTimeout(() => {
+              const el = document.getElementById(kpi.id);
+              if (el) {
+                if (kpi.duration > 0) {
+                  animateCountUp(el, kpi.final, kpi.duration);
+                } else {
+                  el.textContent = kpi.final;
+                }
+              }
+            }, i * 120);
+          });
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.5 });
+    observer.observe(kpiBlock);
+  }
+</script>
+</body>
+</html>

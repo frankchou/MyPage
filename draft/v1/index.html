@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.CHOU.SYS — 全端 AI 架構師 × 企業轉型 PM</title>
+  <meta name="description" content="7 年 B2B 系統落地 × 5 個親手打造的 AI SaaS 產品。預約技術顧問對談。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* =====================================================
+       DESIGN TOKENS — ui-proposal.md + art-direction.md
+    ===================================================== */
+    :root {
+      /* Background */
+      --bg-base:           #080C10;
+      --bg-surface:        #0D1520;
+      --bg-elevated:       #1A2535;
+      /* Accent */
+      --accent-cyan:       #00f5d4;
+      --accent-amber:      #f5a623;
+      --accent-green:      #39ff14;
+      /* Text */
+      --text-primary:      #e8e8f0;
+      --text-secondary:    #8888a8;
+      --text-dim:          #555570;
+      /* Borders */
+      --border-subtle:     rgba(255,255,255,0.08);
+      --border-glow-cyan:  rgba(0,245,212,0.4);
+      --border-glow-amber: rgba(245,166,35,0.4);
+      /* Glow helpers */
+      --cyan-glow:         rgba(0,245,212,0.25);
+      --amber-glow:        rgba(245,166,35,0.30);
+      --green-glow:        rgba(57,255,20,0.20);
+      /* Layout */
+      --nav-height:        64px;
+      --max-width:         1280px;
+    }
+
+    /* =====================================================
+       RESET
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a  { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* =====================================================
+       REDUCED MOTION — stop all keyframe animations
+    ===================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration:       0.001ms !important;
+        animation-iteration-count: 1      !important;
+        transition-duration:       0.001ms !important;
+      }
+    }
+
+    /* =====================================================
+       KEYFRAMES
+    ===================================================== */
+    @keyframes cursor-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes radar-rotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes blip-pulse {
+      0%, 100% { opacity: 0.95; transform: translate(-50%,-50%) scale(1); }
+      50%       { opacity: 0.2;  transform: translate(-50%,-50%) scale(0.5); }
+    }
+    @keyframes node-pulse {
+      0%   { box-shadow: 0 0 0 0   rgba(57,255,20,0.55), 0 0 0 8px  rgba(57,255,20,0.15); }
+      70%  { box-shadow: 0 0 0 16px rgba(57,255,20,0),   0 0 0 28px rgba(57,255,20,0); }
+      100% { box-shadow: 0 0 0 0   rgba(57,255,20,0),   0 0 0 0    rgba(57,255,20,0); }
+    }
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadein {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes status-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* =====================================================
+       SCROLLBAR
+    ===================================================== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track  { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
+    /* =====================================================
+       FOCUS RING (a11y)
+    ===================================================== */
+    :focus-visible {
+      outline: 2px solid rgba(0,245,212,0.65);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    /* =====================================================
+       LAYOUT HELPERS
+    ===================================================== */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .section {
+      padding: 96px 0;
+    }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: inline-block;
+      position: relative;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -6px; left: 0;
+      width: 100%; height: 2px;
+    }
+    .section-title.amber::after {
+      background: linear-gradient(90deg, var(--accent-amber) 0%, transparent 100%);
+    }
+    .section-title.green::after {
+      background: linear-gradient(90deg, var(--accent-green) 0%, transparent 100%);
+    }
+    .section-header { margin-bottom: 56px; }
+
+    /* =====================================================
+       NAV
+    ===================================================== */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-height);
+      z-index: 1000;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background: rgba(8,12,16,0.6);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: backdrop-filter 0.3s ease, background 0.3s ease;
+    }
+    .nav.scrolled {
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
+      background: rgba(8,12,16,0.88);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 16px var(--cyan-glow);
+      display: flex;
+      align-items: center;
+    }
+    .nav-logo-cursor {
+      display: inline-block;
+      width: 8px; height: 16px;
+      background: var(--accent-cyan);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: cursor-blink 0.7s steps(1) infinite;
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      position: relative;
+      padding-bottom: 4px;
+      transition: color 0.2s ease;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 1px;
+      background: var(--accent-cyan);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active {
+      color: var(--accent-cyan);
+    }
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    /* Hamburger */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      padding: 8px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .nav-hamburger[aria-expanded="true"] span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .nav-hamburger[aria-expanded="true"] span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav-hamburger[aria-expanded="true"] span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* Mobile menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: var(--nav-height); left: 0; right: 0;
+      background: rgba(8,12,16,0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 999;
+      padding: 16px 24px 24px;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 15px;
+      color: var(--text-secondary);
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: color 0.2s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover { color: var(--accent-cyan); }
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+    .hero {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      padding-top: var(--nav-height);
+      position: relative;
+      overflow: hidden;
+    }
+    /* dot grid */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(0,245,212,0.07) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+    /* ambient glow */
+    .hero-glow-cyan {
+      position: absolute;
+      top: 15%; right: 10%;
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(0,245,212,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-glow-amber {
+      position: absolute;
+      bottom: 10%; left: 5%;
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(245,166,35,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 40% 60%;
+      align-items: center;
+      gap: 40px;
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    /* Status */
+    .hero-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .hero-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--green-glow);
+      animation: status-blink 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .hero-status-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-green);
+      letter-spacing: 0.08em;
+    }
+
+    /* Title */
+    .hero-title {
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .hero-title .hl {
+      color: var(--accent-cyan);
+      text-shadow: 0 0 20px var(--cyan-glow);
+    }
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+      line-height: 1.6;
+      max-width: 440px;
+    }
+    .hero-ctas {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    /* CTA Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      border: 2px solid var(--accent-cyan);
+      background: transparent;
+      color: var(--accent-cyan);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      box-shadow: 0 0 16px rgba(0,245,212,0.2), inset 0 0 16px rgba(0,245,212,0.04);
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary:hover, .btn-primary:focus-visible {
+      background: var(--accent-cyan);
+      color: #080C10;
+      box-shadow: 0 0 28px rgba(0,245,212,0.5);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid transparent;
+      padding-bottom: 2px;
+      transition: color 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+      background: none;
+    }
+    .btn-secondary:hover, .btn-secondary:focus-visible {
+      color: var(--text-primary);
+      border-bottom-color: var(--text-primary);
+    }
+
+    /* =====================================================
+       RADAR
+    ===================================================== */
+    .hero-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .radar-container {
+      position: relative;
+      width: 480px;
+      height: 480px;
+      flex-shrink: 0;
+    }
+    /* rings */
+    .radar-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(0,245,212,0.13);
+    }
+    .radar-ring:nth-child(1) { inset: 10%; }
+    .radar-ring:nth-child(2) { inset: 25%; }
+    .radar-ring:nth-child(3) { inset: 42%; }
+    .radar-ring:nth-child(4) { inset: 58%; }
+    /* crosshair */
+    .radar-crosshair {
+      position: absolute;
+      inset: 0;
+    }
+    .radar-crosshair::before,
+    .radar-crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(0,245,212,0.10);
+    }
+    .radar-crosshair::before {
+      top: 0; bottom: 0;
+      left: 50%; width: 1px;
+      transform: translateX(-50%);
+    }
+    .radar-crosshair::after {
+      left: 0; right: 0;
+      top: 50%; height: 1px;
+      transform: translateY(-50%);
+    }
+    /* scan sweep */
+    .radar-scan-wrap {
+      position: absolute;
+      inset: 10%;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    .radar-scan {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(0,245,212,0)    0deg,
+        rgba(0,245,212,0)  280deg,
+        rgba(0,245,212,0.04) 310deg,
+        rgba(0,245,212,0.18) 345deg,
+        rgba(0,245,212,0.26) 360deg
+      );
+      animation: radar-rotate 4s linear infinite;
+    }
+    /* blips */
+    .radar-blip {
+      position: absolute;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan), 0 0 20px rgba(0,245,212,0.45);
+      transform: translate(-50%, -50%);
+    }
+    .radar-blip:nth-child(6)  { top: 28%; left: 63%; animation: blip-pulse 2.3s ease-in-out infinite; }
+    .radar-blip:nth-child(7)  { top: 56%; left: 74%; animation: blip-pulse 3.1s ease-in-out infinite 0.8s; }
+    .radar-blip:nth-child(8)  { top: 70%; left: 38%; animation: blip-pulse 2.7s ease-in-out infinite 1.3s; }
+    .radar-blip:nth-child(9)  { top: 33%; left: 28%; animation: blip-pulse 3.6s ease-in-out infinite 0.4s; }
+    .radar-blip:nth-child(10) { top: 46%; left: 56%; animation: blip-pulse 2.1s ease-in-out infinite 1.9s; }
+    /* corner labels */
+    .radar-label {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: rgba(0,245,212,0.3);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+    }
+    .radar-label.tl { top: 7%;  left: 10%; }
+    .radar-label.tr { top: 7%;  right: 7%; }
+    .radar-label.bl { bottom: 7%; left: 10%; }
+    .radar-label.br { bottom: 7%; right: 7%; }
+
+    /* =====================================================
+       FIXED CTA
+    ===================================================== */
+    .fixed-cta {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 500;
+      animation: fadein 1s ease 1.5s both;
+    }
+    .fixed-cta .btn-primary {
+      padding: 12px 20px;
+      font-size: 13px;
+      box-shadow: 0 0 20px rgba(0,245,212,0.3), 0 4px 24px rgba(0,0,0,0.5);
+    }
+    /* mobile: hidden until scrolled > 50vh */
+    @media (max-width: 768px) {
+      .fixed-cta {
+        bottom: 20px; right: 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .fixed-cta.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    /* =====================================================
+       B2B / ENTERPRISE
+    ===================================================== */
+    .enterprise {
+      background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-surface) 100%);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .metric-card {
+      position: relative;
+      background: rgba(14,22,32,0.72);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--accent-amber);
+      border-radius: 12px;
+      padding: 28px 24px;
+      overflow: hidden;
+      /* start hidden — animated in by IntersectionObserver */
+      opacity: 0;
+      transform: translateY(20px);
+      transition: background 0.2s ease, border-left-color 0.2s ease;
+    }
+    .metric-card.animated {
+      animation: card-in 0.4s ease forwards;
+    }
+    .metric-card:nth-child(2).animated { animation-delay: 0.08s; }
+    .metric-card:nth-child(3).animated { animation-delay: 0.16s; }
+    .metric-card:nth-child(4).animated { animation-delay: 0.24s; }
+    .metric-card:hover {
+      background: var(--bg-elevated);
+      border-left-color: #fbbf24;
+    }
+    /* topology grid overlay */
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,166,35,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,166,35,0.07) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+    .metric-card:hover::after { opacity: 1; }
+    .metric-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      text-shadow: 0 0 20px var(--amber-glow);
+      line-height: 1;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .metric-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .metric-source {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    /* =====================================================
+       AI SKUNKWORKS
+    ===================================================== */
+    .skunkworks {
+      position: relative;
+      background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+    }
+    .skunkworks::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(57,255,20,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,255,20,0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+    }
+
+    /* Desktop 3-col grid — Node 01 in center of row 1, others surround */
+    .nodes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 24px;
+    }
+    .tech-node {
+      position: relative;
+      background: rgba(14,22,32,0.72);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(57,255,20,0.14);
+      border-radius: 16px;
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .tech-node.animated { animation: card-in 0.4s ease forwards; }
+    .tech-node:nth-child(2).animated { animation-delay: 0.08s; }
+    .tech-node:nth-child(3).animated { animation-delay: 0.16s; }
+    .tech-node:nth-child(4).animated { animation-delay: 0.24s; }
+    .tech-node:nth-child(5).animated { animation-delay: 0.32s; }
+
+    /* non-symmetric placement: center col = Node 01 */
+    .node-01 { grid-column: 2; grid-row: 1; }
+    .node-02 { grid-column: 1; grid-row: 1; }
+    .node-03 { grid-column: 3; grid-row: 1; }
+    .node-04 { grid-column: 1; grid-row: 2; }
+    .node-05 { grid-column: 3; grid-row: 2; }
+
+    .tech-node:hover {
+      border-color: rgba(57,255,20,0.45);
+      background: rgba(20,32,20,0.85);
+      transform: translateY(-2px);
+    }
+    .tech-node.active-node {
+      border-color: var(--accent-cyan);
+      transform: scale(1.02);
+    }
+    .node-orb {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(57,255,20,0.1);
+      border: 2px solid rgba(57,255,20,0.45);
+      margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: center;
+      animation: node-pulse 6s ease-in-out infinite;
+      box-shadow: 0 0 12px rgba(57,255,20,0.25);
+      transition: box-shadow 0.2s;
+    }
+    .node-01 .node-orb { width: 56px; height: 56px; }
+    .tech-node:hover .node-orb {
+      animation-duration: 1.5s;
+      box-shadow: 0 0 22px rgba(57,255,20,0.5);
+    }
+    .node-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent-green);
+      letter-spacing: 0.12em;
+      margin-bottom: 6px;
+    }
+    .node-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .node-01 .node-name { font-size: 22px; }
+    .node-tagline {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .node-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(57,255,20,0.07);
+      border: 1px solid rgba(57,255,20,0.2);
+      color: var(--accent-green);
+      letter-spacing: 0.04em;
+    }
+    .pill.cyan {
+      background: rgba(0,245,212,0.07);
+      border-color: rgba(0,245,212,0.2);
+      color: var(--accent-cyan);
+    }
+    .pill.amber {
+      background: rgba(245,166,35,0.07);
+      border-color: rgba(245,166,35,0.2);
+      color: var(--accent-amber);
+    }
+    .node-arrow {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 14px;
+      color: var(--text-dim);
+      transition: color 0.2s, transform 0.2s;
+    }
+    .tech-node:hover .node-arrow,
+    .tech-node.active-node .node-arrow {
+      color: var(--accent-green);
+      transform: translateX(3px);
+    }
+
+    /* =====================================================
+       SLIDE-OVER
+    ===================================================== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 900;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+
+    .slide-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 480px;
+      z-index: 950;
+      background: rgba(8,12,16,0.95);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border-left: 1px solid rgba(0,245,212,0.15);
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.35s ease-out, opacity 0.35s ease-out;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .slide-panel.open {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky; top: 0;
+      background: rgba(8,12,16,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1;
+    }
+    .panel-breadcrumb {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .panel-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .panel-node-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-green);
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .panel-close {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      flex-shrink: 0;
+      margin-left: 16px;
+      min-width: 36px;
+    }
+    .panel-close:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+    .panel-body { padding: 28px; flex: 1; }
+    .panel-section { margin-bottom: 28px; }
+    .panel-section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent-amber);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .panel-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .panel-challenge {
+      background: rgba(245,166,35,0.05);
+      border-left: 2px solid var(--accent-amber);
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .panel-topology {
+      background: rgba(0,245,212,0.03);
+      border: 1px solid rgba(0,245,212,0.08);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .panel-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .panel-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: rgba(0,245,212,0.06);
+      border: 1px solid rgba(0,245,212,0.2);
+      color: var(--accent-cyan);
+    }
+
+    /* =====================================================
+       TERMINAL TEASER
+    ===================================================== */
+    .terminal-section {
+      background: var(--bg-base);
+    }
+    .terminal-box {
+      background: rgba(14,22,32,0.72);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: left;
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+    .footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 48px 0;
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .footer-nda {
+      padding-left: 16px;
+      border-left: 2px solid rgba(245,166,35,0.4);
+    }
+    .footer-nda-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent-amber);
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+    .footer-nda-text {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .footer-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .footer-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 10px var(--cyan-glow);
+    }
+    .footer-copy, .footer-edu {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* =====================================================
+       MOBILE ACCORDION (nodes)
+    ===================================================== */
+    .nodes-accordion { display: none; }
+
+    .accordion-item {
+      background: rgba(14,22,32,0.72);
+      border: 1px solid rgba(57,255,20,0.14);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .accordion-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: none;
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 44px;
+      text-align: left;
+    }
+    .accordion-trigger-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .accordion-node-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent-green);
+      letter-spacing: 0.1em;
+    }
+    .accordion-chevron {
+      width: 18px; height: 18px;
+      color: var(--text-dim);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .accordion-trigger[aria-expanded="true"] .accordion-chevron {
+      transform: rotate(180deg);
+    }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .accordion-body-inner {
+      padding: 4px 20px 20px;
+    }
+    .accordion-body-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    /* =====================================================
+       RESPONSIVE BREAKPOINTS
+    ===================================================== */
+    @media (max-width: 1024px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+      /* nodes: 2-col tablet */
+      .node-01 { grid-column: 1 / 3; grid-row: 1; }
+      .node-02 { grid-column: 1; grid-row: 2; }
+      .node-03 { grid-column: 2; grid-row: 2; }
+      .node-04 { grid-column: 1; grid-row: 3; }
+      .node-05 { grid-column: 2; grid-row: 3; }
+      .slide-panel { width: 360px; }
+    }
+
+    @media (max-width: 768px) {
+      /* Nav */
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+
+      /* Hero */
+      .hero-inner {
+        grid-template-columns: 1fr;
+        padding: 60px 24px 48px;
+        text-align: center;
+      }
+      .hero-ctas { align-items: center; }
+      .hero-status { justify-content: center; }
+      .hero-subtitle { max-width: 100%; }
+      .hero-right { order: -1; }
+      .radar-container { width: 280px; height: 280px; }
+      .radar-label { display: none; }
+
+      /* Section */
+      .section { padding: 64px 0; }
+
+      /* Metrics */
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .metric-number { font-size: 36px; }
+
+      /* Nodes: show accordion, hide grid */
+      .nodes-grid { display: none; }
+      .nodes-accordion { display: block; }
+
+      /* Slide-over full width */
+      .slide-panel { width: 100%; left: 0; }
+
+      /* Footer */
+      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+      .footer-right { align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===========================
+       NAV
+  =========================== -->
+  <nav class="nav" id="nav" role="navigation" aria-label="主導覽">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" aria-label="F.CHOU.SYS 回到頂部">
+        F.CHOU.SYS<span class="nav-logo-cursor" aria-hidden="true"></span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#enterprise" class="active">Enterprise Core</a></li>
+        <li><a href="#skunkworks">AI Skunkworks</a></li>
+        <li><a href="#terminal">Terminal</a></li>
+      </ul>
+      <button class="nav-hamburger" id="hamburger"
+        aria-label="開啟選單" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav -->
+  <div class="mobile-menu" id="mobile-menu" role="navigation" aria-label="手機導覽">
+    <a href="#enterprise" onclick="closeMobileMenu()">Enterprise Core</a>
+    <a href="#skunkworks" onclick="closeMobileMenu()">AI Skunkworks</a>
+    <a href="#terminal" onclick="closeMobileMenu()">Terminal</a>
+  </div>
+
+  <!-- ===========================
+       HERO
+  =========================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-glow-cyan" aria-hidden="true"></div>
+    <div class="hero-glow-amber" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-status" aria-label="系統狀態：線上，5 個 AI SaaS 運行中">
+          <span class="hero-status-dot" aria-hidden="true"></span>
+          <span class="hero-status-text">SYSTEM_ONLINE &nbsp;·&nbsp; 5_AI_SAAS_LIVE</span>
+        </div>
+        <h1 class="hero-title" id="hero-title">
+          全端 AI 架構師<br><span class="hl">× 企業轉型 PM</span>
+        </h1>
+        <p class="hero-subtitle">
+          7 年 B2B 系統落地 × 5 個親手打造的 AI SaaS 產品
+        </p>
+        <div class="hero-ctas">
+          <button class="btn-primary" onclick="openCalendly()" aria-label="預約技術顧問對談">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            預約技術顧問對談
+          </button>
+          <button class="btn-secondary" onclick="downloadResume()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            下載 PDF 履歷
+          </button>
+        </div>
+      </div>
+
+      <!-- Radar -->
+      <div class="hero-right" aria-hidden="true">
+        <div class="radar-container">
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-crosshair"></div>
+          <div class="radar-scan-wrap">
+            <div class="radar-scan"></div>
+          </div>
+          <!-- 5 blips -->
+          <div class="radar-blip"></div>
+          <div class="radar-blip"></div>
+          <div class="radar-blip"></div>
+          <div class="radar-blip"></div>
+          <div class="radar-blip"></div>
+          <!-- labels -->
+          <span class="radar-label tl">ATM · B2B</span>
+          <span class="radar-label tr">AI_SAAS</span>
+          <span class="radar-label bl">ENTERPRISE</span>
+          <span class="radar-label br">RAG · LLM</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fixed CTA -->
+  <div class="fixed-cta" id="fixed-cta">
+    <button class="btn-primary" onclick="openCalendly()" aria-label="快速預約技術顧問對談">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      預約對談
+    </button>
+  </div>
+
+  <!-- ===========================
+       ENTERPRISE / B2B
+  =========================== -->
+  <section class="section enterprise" id="enterprise" aria-labelledby="enterprise-heading">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">B2B · COMMAND · CORE</p>
+        <h2 class="section-title amber" id="enterprise-heading">Enterprise Command Core</h2>
+      </div>
+      <div class="metrics-grid" id="metrics-grid">
+        <article class="metric-card" aria-label="時間成本指標卡片">
+          <div class="metric-number" data-target="97" data-prefix="-" data-suffix="%" aria-live="polite">-0%</div>
+          <p class="metric-desc">會議準備時間成本削減<br>（緯創集團會議室自動化系統）</p>
+          <p class="metric-source">WISTRON_GROUP · WMS</p>
+        </article>
+        <article class="metric-card" aria-label="效率提升指標卡片">
+          <div class="metric-number" data-target="60" data-prefix="+" data-suffix="%" aria-live="polite">+0%</div>
+          <p class="metric-desc">跨團隊對接效率提升<br>（爭鮮 SAP 系統整合專案）</p>
+          <p class="metric-source">SUSHIEXPRESS · SAP</p>
+        </article>
+        <article class="metric-card" aria-label="資料正確性指標卡片">
+          <div class="metric-number" data-target="100" data-prefix="" data-suffix="%" aria-live="polite">0%</div>
+          <p class="metric-desc">SAP 數據交換正確性<br>（自動化驗證流程建立）</p>
+          <p class="metric-source">SAP_DATA_EXCHANGE</p>
+        </article>
+        <article class="metric-card" aria-label="跨國調度指標卡片">
+          <div class="metric-number" data-target="2" data-prefix="" data-suffix="國 5部門" aria-live="polite">0</div>
+          <p class="metric-desc">跨國專案調度管理<br>（緯創 WMS / HRIS 整合計劃）</p>
+          <p class="metric-source">2_COUNTRIES · 5_DEPTS</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================
+       AI SKUNKWORKS
+  =========================== -->
+  <section class="section skunkworks" id="skunkworks" aria-labelledby="skunkworks-heading">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">AI · PRODUCTS · LIVE</p>
+        <h2 class="section-title green" id="skunkworks-heading">AI Skunkworks</h2>
+      </div>
+
+      <!-- Desktop grid -->
+      <div class="nodes-grid" id="nodes-grid" role="list" aria-label="AI 產品節點列表">
+
+        <!-- Node 01 -->
+        <article class="tech-node node-01" role="listitem" tabindex="0"
+          aria-label="AI Hunter — 點擊開啟詳情" aria-expanded="false"
+          data-node="0" onclick="openPanel(0)" onkeydown="nodeKeyDown(event,0)">
+          <span class="node-arrow" aria-hidden="true">→</span>
+          <div class="node-orb" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-green)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <p class="node-id">NODE_01 · PRIMARY</p>
+          <h3 class="node-name">AI Hunter</h3>
+          <p class="node-tagline">RAG 智慧搜尋 · 多源資料整合分析平台</p>
+          <div class="node-pills">
+            <span class="pill">RAG</span>
+            <span class="pill">LLM</span>
+            <span class="pill">Multi-Source</span>
+          </div>
+        </article>
+
+        <!-- Node 02 -->
+        <article class="tech-node node-02" role="listitem" tabindex="0"
+          aria-label="尋物小精靈 — 點擊開啟詳情" aria-expanded="false"
+          data-node="1" onclick="openPanel(1)" onkeydown="nodeKeyDown(event,1)">
+          <span class="node-arrow" aria-hidden="true">→</span>
+          <div class="node-orb" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-green)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <p class="node-id">NODE_02</p>
+          <h3 class="node-name">尋物小精靈</h3>
+          <p class="node-tagline">即時同步 · 多用戶資料庫協作系統</p>
+          <div class="node-pills">
+            <span class="pill">Real-time Sync</span>
+            <span class="pill">Multi-user DB</span>
+          </div>
+        </article>
+
+        <!-- Node 03 -->
+        <article class="tech-node node-03" role="listitem" tabindex="0"
+          aria-label="DailyLumos — 點擊開啟詳情" aria-expanded="false"
+          data-node="2" onclick="openPanel(2)" onkeydown="nodeKeyDown(event,2)">
+          <span class="node-arrow" aria-hidden="true">→</span>
+          <div class="node-orb" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-green)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <p class="node-id">NODE_03</p>
+          <h3 class="node-name">DailyLumos</h3>
+          <p class="node-tagline">向量資料庫 · 語意搜尋日常洞察平台</p>
+          <div class="node-pills">
+            <span class="pill">Vector DB</span>
+            <span class="pill">Semantic Search</span>
+          </div>
+        </article>
+
+        <!-- Node 04 -->
+        <article class="tech-node node-04" role="listitem" tabindex="0"
+          aria-label="VocalCanvas — 點擊開啟詳情" aria-expanded="false"
+          data-node="3" onclick="openPanel(3)" onkeydown="nodeKeyDown(event,3)">
+          <span class="node-arrow" aria-hidden="true">→</span>
+          <div class="node-orb" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-green)"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </div>
+          <p class="node-id">NODE_04</p>
+          <h3 class="node-name">VocalCanvas</h3>
+          <p class="node-tagline">TTS 音訊串流 · 低成本語音合成平台</p>
+          <div class="node-pills">
+            <span class="pill">TTS</span>
+            <span class="pill">Audio Stream</span>
+            <span class="pill amber">Cost Opt</span>
+          </div>
+        </article>
+
+        <!-- Node 05 -->
+        <article class="tech-node node-05" role="listitem" tabindex="0"
+          aria-label="無敏毛孩 — 點擊開啟詳情" aria-expanded="false"
+          data-node="4" onclick="openPanel(4)" onkeydown="nodeKeyDown(event,4)">
+          <span class="node-arrow" aria-hidden="true">→</span>
+          <div class="node-orb" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-green)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <p class="node-id">NODE_05</p>
+          <h3 class="node-name">無敏毛孩</h3>
+          <p class="node-tagline">視覺 AI · 寵物過敏成分辨識與領域知識圖譜</p>
+          <div class="node-pills">
+            <span class="pill">Vision AI</span>
+            <span class="pill">Domain Mapping</span>
+          </div>
+        </article>
+      </div>
+
+      <!-- Mobile accordion -->
+      <div class="nodes-accordion" id="nodes-accordion" aria-label="AI 產品節點（手機版）">
+        <!-- injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================
+       TERMINAL TEASER
+  =========================== -->
+  <section class="section terminal-section" id="terminal" aria-labelledby="terminal-heading">
+    <div class="container" style="text-align:center;">
+      <div class="section-header" style="margin-bottom:32px;">
+        <p class="section-label">INSIGHTS · ARTICLES</p>
+        <h2 class="section-title" id="terminal-heading" style="display:inline-block;">Terminal 洞察</h2>
+      </div>
+      <div class="terminal-box" role="region" aria-label="終端機文章預覽">
+        <span style="color:var(--accent-green);">root@fchou.sys</span><span style="color:var(--text-dim);">:~$</span>
+        <span style="color:var(--text-primary);"> ls articles/</span><br><br>
+        <span style="color:var(--accent-amber);">SYS-ARCH-001</span>&nbsp;&nbsp; <span>RAG 架構選型實戰指南</span><br>
+        <span style="color:var(--accent-amber);">AI-SAAS-002</span>&nbsp;&nbsp;&nbsp; <span>LLM 成本優化：從 $800 到 $80/月</span><br>
+        <span style="color:var(--accent-amber);">ERP-INTG-003</span>&nbsp;&nbsp; <span>SAP 非技術主管的整合地圖</span><br><br>
+        <span style="color:var(--text-dim);">// 更多文章即將上線 — Request Access ↓</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================
+       FOOTER
+  =========================== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-nda">
+          <p class="footer-nda-label">NDA_DISCLAIMER</p>
+          <p class="footer-nda-text">
+            本頁面所呈現之企業合作成果，均已取得相關企業同意或去識別化處理，
+            不涉及任何保密協議（NDA）所保護之機密資訊。
+            具體數字為內部評估指標，僅用於個人作品集展示之目的。
+          </p>
+        </div>
+        <div class="footer-right">
+          <div class="footer-logo">F.CHOU.SYS</div>
+          <p class="footer-copy">© 2026 Frank Chou. All rights reserved.</p>
+          <p class="footer-edu">國立中央大學 資訊管理學系</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===========================
+       SLIDE-OVER
+  =========================== -->
+  <div class="overlay" id="overlay" onclick="closePanel()" role="presentation" aria-hidden="true"></div>
+
+  <aside class="slide-panel" id="slide-panel"
+    role="dialog" aria-modal="true" aria-labelledby="panel-title" tabindex="-1">
+    <div class="panel-header">
+      <div>
+        <p class="panel-breadcrumb" id="panel-breadcrumb">Root &gt; AI_Skunkworks</p>
+        <h2 class="panel-title" id="panel-title">—</h2>
+        <p class="panel-node-id" id="panel-node-id">NODE_00</p>
+      </div>
+      <button class="panel-close" onclick="closePanel()" aria-label="關閉側面板（ESC 亦可關閉）">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel-body" id="panel-body"></div>
+  </aside>
+
+  <!-- ===========================
+       JAVASCRIPT
+  =========================== -->
+  <script>
+    'use strict';
+
+    /* ----------------------------
+       NODE DATA
+    ---------------------------- */
+    var NODE_DATA = [
+      {
+        id: 'NODE_01',
+        name: 'AI Hunter',
+        description: 'AI Hunter 是一套以 RAG（Retrieval-Augmented Generation）為核心的企業情報搜尋平台，能從多個異構數據源（PDF、資料庫、網頁、API）即時摘取、向量化並回答自然語言查詢。設計理念是讓非技術主管也能直接與企業知識庫對話。',
+        challenge: '核心技術難點在於跨數據源的語意一致性——不同格式文件的 Embedding 品質差異極大，以及 Context Window 管理：如何在有限 Token 預算內塞入最相關的上下文，同時避免「幻覺」回答。',
+        topo: ['User Query', 'Embedding', 'Vector DB', 'LLM', 'Response'],
+        topoLines: [[0,1],[1,2],[2,3],[3,4]],
+        stack: ['RAG', 'LangChain', 'Pinecone', 'OpenAI API', 'FastAPI', 'Next.js', 'PostgreSQL']
+      },
+      {
+        id: 'NODE_02',
+        name: '尋物小精靈',
+        description: '尋物小精靈是一個面向中小企業的物品追蹤 SaaS 平台，支援多用戶即時同步。核心功能涵蓋物品借還記錄、位置追蹤、到期提醒自動推送。設計上強調零培訓門檻，讓倉庫人員當天即可上手操作。',
+        challenge: '多用戶即時同步場景下的衝突解決（Conflict Resolution）是核心挑戰——當兩個用戶同時修改同一筆物品記錄時，系統必須以業務規則決定優先級，同時確保 UI 不出現閃爍或狀態回滾。',
+        topo: ['User A', 'User B', 'Firebase RTDB', 'Resolver', 'Sync State'],
+        topoLines: [[0,2],[1,2],[2,3],[3,4]],
+        stack: ['Firebase RTDB', 'React', 'TypeScript', 'Cloud Functions', 'FCM Push']
+      },
+      {
+        id: 'NODE_03',
+        name: 'DailyLumos',
+        description: 'DailyLumos 是個人知識管理 × AI 洞察平台，讓用戶以自然語言搜尋自己的日記、筆記與讀書摘要。透過語意向量索引，即使文字不完全匹配也能找到相關紀錄，進而生成跨時間的個人行為洞察報告。',
+        challenge: '個人隱私資料的向量化與儲存帶來安全挑戰：向量本身可被逆推出原始內容。解法是在用戶端進行 Embedding 後只上傳向量，原始文字留在本地加密儲存，實現零知識架構。',
+        topo: ['Local Notes', 'Local Embed', 'Qdrant', 'LLM Insight', 'Report'],
+        topoLines: [[0,1],[1,2],[2,3],[3,4]],
+        stack: ['Qdrant', 'Ollama', 'Llama 3', 'Svelte', 'SQLite', 'Tauri']
+      },
+      {
+        id: 'NODE_04',
+        name: 'VocalCanvas',
+        description: 'VocalCanvas 是一套多語言 TTS SaaS 平台，面向內容創作者與電商商品影音自動化場景。平台特點是以串流方式輸出音訊，讓首字節延遲（TTFB）低於 800ms，同時透過 TTS Provider 智能路由，將每月音訊成本壓縮 65% 以上。',
+        challenge: 'TTS 成本優化的核心是 Provider 智能路由：依照語言、情緒標記、預算設定，動態選擇 ElevenLabs / Azure / Google TTS。難點是不同 Provider 的音訊格式與延遲差異，必須在代理層做格式統一與緩衝管理。',
+        topo: ['Text Input', 'Router', 'TTS Provider', 'Audio Buffer', 'Stream Out'],
+        topoLines: [[0,1],[1,2],[2,3],[3,4]],
+        stack: ['Node.js', 'WebSocket', 'ElevenLabs API', 'Azure TTS', 'Redis Cache', 'React']
+      },
+      {
+        id: 'NODE_05',
+        name: '無敏毛孩',
+        description: '無敏毛孩是針對寵物過敏問題打造的 AI 輔助決策平台。用戶拍攝寵物食品標籤，系統以視覺 AI OCR 提取成分列表，再比對知識圖譜中的過敏原資料庫，輸出個性化的安全評估報告。知識圖譜覆蓋超過 2,000 種常見寵物食材與對應過敏等級。',
+        challenge: '寵物食品成分標籤的文字辨識難點在於：字體微小、背景色複雜、多語言混排（中文 + 英文 + 拉丁學名）。解法是以 PaddleOCR 做初步識別，再以 GPT-4o Vision 做二次確認與成分標準化，準確率達 94%。',
+        topo: ['Label Photo', 'OCR Engine', 'GPT-4o', 'Knowledge Graph', 'Safety Report'],
+        topoLines: [[0,1],[1,2],[2,3],[3,4]],
+        stack: ['PaddleOCR', 'GPT-4o Vision', 'Neo4j', 'FastAPI', 'React Native', 'Knowledge Graph']
+      }
+    ];
+
+    /* ----------------------------
+       MOBILE ACCORDION BUILDER
+    ---------------------------- */
+    (function buildAccordion() {
+      var container = document.getElementById('nodes-accordion');
+      NODE_DATA.forEach(function(node, idx) {
+        var item = document.createElement('div');
+        item.className = 'accordion-item';
+        item.innerHTML =
+          '<button class="accordion-trigger" aria-expanded="false" aria-controls="acc-body-' + idx + '" data-idx="' + idx + '">' +
+            '<span class="accordion-trigger-left">' +
+              '<span class="accordion-node-id">' + node.id + '</span>' +
+              '<span>' + node.name + '</span>' +
+            '</span>' +
+            '<svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>' +
+          '</button>' +
+          '<div class="accordion-body" id="acc-body-' + idx + '" role="region">' +
+            '<div class="accordion-body-inner">' +
+              '<p class="accordion-body-desc">' + node.description + '</p>' +
+              '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+                node.stack.map(function(t){ return '<span class="pill cyan">' + t + '</span>'; }).join('') +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        container.appendChild(item);
+
+        item.querySelector('.accordion-trigger').addEventListener('click', function() {
+          var expanded = this.getAttribute('aria-expanded') === 'true';
+          // close all
+          container.querySelectorAll('.accordion-trigger').forEach(function(t) {
+            t.setAttribute('aria-expanded', 'false');
+            var body = document.getElementById(t.getAttribute('aria-controls'));
+            if (body) body.style.maxHeight = '0';
+          });
+          if (!expanded) {
+            this.setAttribute('aria-expanded', 'true');
+            var bodyEl = document.getElementById(this.getAttribute('aria-controls'));
+            if (bodyEl) bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+          }
+        });
+      });
+    }());
+
+    /* ----------------------------
+       TOPOLOGY SVG
+    ---------------------------- */
+    function buildTopoSVG(labels, lines) {
+      var W = 360, H = 72, padX = 30;
+      var step = (W - padX * 2) / (labels.length - 1);
+      var cy = H / 2 - 8;
+      var pts = labels.map(function(_, i){ return [padX + step * i, cy]; });
+      var svgParts = ['<svg viewBox="0 0 ' + W + ' ' + (H + 16) + '" xmlns="http://www.w3.org/2000/svg" width="100%" style="overflow:visible">'];
+      lines.forEach(function(l) {
+        svgParts.push('<line x1="' + pts[l[0]][0] + '" y1="' + pts[l[0]][1] + '" x2="' + pts[l[1]][0] + '" y2="' + pts[l[1]][1] + '" stroke="rgba(0,245,212,0.22)" stroke-width="1.5" stroke-dasharray="4 3"/>');
+      });
+      labels.forEach(function(label, i) {
+        svgParts.push(
+          '<circle cx="' + pts[i][0] + '" cy="' + cy + '" r="5" fill="rgba(0,245,212,0.12)" stroke="rgba(0,245,212,0.55)" stroke-width="1.5"/>',
+          '<text x="' + pts[i][0] + '" y="' + (cy + 20) + '" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(0,245,212,0.55)">' + label + '</text>'
+        );
+      });
+      svgParts.push('</svg>');
+      return svgParts.join('');
+    }
+
+    /* ----------------------------
+       SLIDE-OVER PANEL
+    ---------------------------- */
+    var currentNodeIdx = null;
+    var prevFocus = null;
+
+    function openPanel(idx) {
+      var node = NODE_DATA[idx];
+      currentNodeIdx = idx;
+      prevFocus = document.activeElement;
+
+      document.getElementById('panel-breadcrumb').textContent = 'Root > AI_Skunkworks > ' + node.name;
+      document.getElementById('panel-title').textContent = node.name;
+      document.getElementById('panel-node-id').textContent = node.id;
+
+      document.getElementById('panel-body').innerHTML =
+        '<div class="panel-section">' +
+          '<p class="panel-section-label">SYSTEM_OVERVIEW</p>' +
+          '<p class="panel-desc">' + node.description + '</p>' +
+        '</div>' +
+        '<div class="panel-section">' +
+          '<p class="panel-section-label">ARCHITECTURE_FLOW</p>' +
+          '<div class="panel-topology">' + buildTopoSVG(node.topo, node.topoLines) + '</div>' +
+        '</div>' +
+        '<div class="panel-section">' +
+          '<p class="panel-section-label">TECHNICAL_CHALLENGE</p>' +
+          '<div class="panel-challenge">' + node.challenge + '</div>' +
+        '</div>' +
+        '<div class="panel-section">' +
+          '<p class="panel-section-label">TECH_STACK</p>' +
+          '<div class="panel-pills">' +
+            node.stack.map(function(t){ return '<span class="panel-pill">' + t + '</span>'; }).join('') +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('overlay').removeAttribute('aria-hidden');
+      document.getElementById('slide-panel').classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      document.querySelectorAll('.tech-node').forEach(function(el, i) {
+        el.classList.toggle('active-node', i === idx);
+        el.setAttribute('aria-expanded', i === idx ? 'true' : 'false');
+      });
+
+      setTimeout(function() {
+        document.getElementById('panel-close') && document.getElementById('panel-close').focus();
+      }, 60);
+    }
+
+    function closePanel() {
+      document.getElementById('overlay').classList.remove('open');
+      document.getElementById('overlay').setAttribute('aria-hidden', 'true');
+      document.getElementById('slide-panel').classList.remove('open');
+      document.body.style.overflow = '';
+      document.querySelectorAll('.tech-node').forEach(function(el) {
+        el.classList.remove('active-node');
+        el.setAttribute('aria-expanded', 'false');
+      });
+      currentNodeIdx = null;
+      if (prevFocus) { prevFocus.focus(); prevFocus = null; }
+    }
+
+    // expose close button id for focus
+    document.getElementById('panel-close') && (document.getElementById('panel-close').id = 'panel-close');
+
+    function nodeKeyDown(e, idx) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(idx); }
+    }
+
+    // ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && currentNodeIdx !== null) closePanel();
+    });
+
+    // Focus trap
+    document.getElementById('slide-panel').addEventListener('keydown', function(e) {
+      if (e.key !== 'Tab') return;
+      var panel = document.getElementById('slide-panel');
+      var focusable = Array.from(panel.querySelectorAll(
+        'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter(function(el) { return el.offsetParent !== null; });
+      if (!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    /* ----------------------------
+       NAV SCROLL
+    ---------------------------- */
+    var nav = document.getElementById('nav');
+    var fixedCta = document.getElementById('fixed-cta');
+    var scrollTicking = false;
+    var isMobile = window.innerWidth <= 768;
+
+    window.addEventListener('resize', function() { isMobile = window.innerWidth <= 768; }, { passive: true });
+
+    window.addEventListener('scroll', function() {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      requestAnimationFrame(function() {
+        var sy = window.scrollY;
+        nav.classList.toggle('scrolled', sy > 10);
+        if (isMobile) {
+          fixedCta.classList.toggle('visible', sy > window.innerHeight * 0.5);
+        }
+        scrollTicking = false;
+      });
+    }, { passive: true });
+
+    /* ----------------------------
+       HAMBURGER
+    ---------------------------- */
+    var hamburger = document.getElementById('hamburger');
+    var mobileMenu = document.getElementById('mobile-menu');
+
+    hamburger.addEventListener('click', function() {
+      var open = mobileMenu.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+
+    /* ----------------------------
+       COUNT-UP (IntersectionObserver)
+    ---------------------------- */
+    function easeOutQuad(t) { return t * (2 - t); }
+
+    function runCountUp(el, target, prefix, suffix, duration) {
+      var start = performance.now();
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) { el.textContent = prefix + target + suffix; return; }
+      function step(now) {
+        var elapsed = now - start;
+        var progress = Math.min(elapsed / duration, 1);
+        var val = Math.round(easeOutQuad(progress) * target);
+        el.textContent = prefix + val + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = prefix + target + suffix;
+      }
+      requestAnimationFrame(step);
+    }
+
+    (function setupMetrics() {
+      var cards = document.querySelectorAll('.metric-card');
+      var triggered = new WeakSet();
+
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting || triggered.has(entry.target)) return;
+          triggered.add(entry.target);
+          var card = entry.target;
+          card.classList.add('animated');
+          var numEl = card.querySelector('.metric-number');
+          if (!numEl) return;
+          var target = parseInt(numEl.dataset.target, 10);
+          var prefix = numEl.dataset.prefix || '';
+          var suffix = numEl.dataset.suffix || '';
+          setTimeout(function() { runCountUp(numEl, target, prefix, suffix, 1200); }, 200);
+        });
+      }, { threshold: 0.25 });
+
+      cards.forEach(function(c) { obs.observe(c); });
+    }());
+
+    /* ----------------------------
+       NODE CARDS ANIMATE-IN
+    ---------------------------- */
+    (function setupNodeAnimations() {
+      var nodes = document.querySelectorAll('.tech-node');
+      var triggered = new WeakSet();
+
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting || triggered.has(entry.target)) return;
+          triggered.add(entry.target);
+          entry.target.classList.add('animated');
+        });
+      }, { threshold: 0.12 });
+
+      nodes.forEach(function(n) { obs.observe(n); });
+    }());
+
+    /* ----------------------------
+       CTA STUBS
+    ---------------------------- */
+    function openCalendly() {
+      /* Production: Calendly embed slide-over */
+      alert('Calendly 預約介面將在此嵌入。\n\n備用聯絡：contact@fchou.sys');
+    }
+    function downloadResume() {
+      /* Production: link to hosted PDF */
+      alert('PDF 履歷下載連結即將啟動。');
+    }
+  </script>
+</body>
+</html>

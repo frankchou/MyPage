@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: 'Clash Grotesk', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Fills */
+  --fill-01: #ffffff;
+  --fill-02: #f3f3f3;
+  --fill-03: #c00719;
+  --fill-04: #fa4e42;
+  --fill-05: #ffb79d;
+  --vanilla: #fffbdf;
+
+  /* Text */
+  --text-01: #030000;
+  --text-02: #838181;
+  --text-05: #ffdcbd;
+  --text-06: #fffbdf;
+  --text-07: #ffffff;
+
+  /* Borders */
+  --border-01: #f3f3f3;
+  --border-03: #cccccc;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--fill-01);
+  color: var(--text-01);
+}
+
+/* Emons motion tokens */
+.transition-hover {
+  transition: color 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+              background-color 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+              border-color 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.transition-morph {
+  transition: border-radius 0.5s cubic-bezier(0.3, 0, 0.2, 1),
+              background-color 0.5s cubic-bezier(0.3, 0, 0.2, 1),
+              color 0.5s cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+.transition-reveal {
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1),
+              opacity 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.transition-expand {
+  transition: max-height 0.5s cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+/* Arrow hover animation */
+@keyframes arrowNudge {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.group:hover .arrow-nudge {
+  animation: arrowNudge 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}

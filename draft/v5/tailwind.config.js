@@ -1,0 +1,73 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        ink: '#030000',
+        'gray-surface': '#f3f3f3',
+        'brand-red': '#c00719',
+        coral: '#fa4e42',
+        peach: '#ffb79d',
+        vanilla: '#fffbdf',
+        'text-muted': '#838181',
+        'peach-light': '#ffdcbd',
+        'border-light': '#f3f3f3',
+        'border-mid': '#cccccc',
+        error: '#990009',
+      },
+      fontFamily: {
+        clash: ['"Clash Grotesk"', 'sans-serif'],
+      },
+      fontSize: {
+        'h1': ['4rem', { lineHeight: '1' }],
+        'h1-mobile': ['2.25rem', { lineHeight: '1' }],
+        'h2': ['3rem', { lineHeight: '1' }],
+        'h2-mobile': ['1.875rem', { lineHeight: '1' }],
+        'h3': ['2.5rem', { lineHeight: '1.15' }],
+        'h3-mobile': ['1.5625rem', { lineHeight: '1.15' }],
+        'h4': ['2rem', { lineHeight: '1.1875' }],
+        'h4-mobile': ['1.25rem', { lineHeight: '1.1875' }],
+        'h5': ['1.5rem', { lineHeight: '1.25' }],
+        'h5-mobile': ['1rem', { lineHeight: '1.25' }],
+        'h6': ['1.25rem', { lineHeight: '1.3' }],
+        'h6-mobile': ['1rem', { lineHeight: '1.3' }],
+        'body-lg': ['1.25rem', { lineHeight: '1.4' }],
+        'body-md': ['1.125rem', { lineHeight: '1.444' }],
+        'body-reg': ['1rem', { lineHeight: '1.5' }],
+        'body-reg-mobile': ['0.90625rem', { lineHeight: '1.5' }],
+        'body-sm': ['0.90625rem', { lineHeight: '1.31' }],
+        'body-xs': ['0.8125rem', { lineHeight: '1.31' }],
+      },
+      spacing: {
+        'section-lg': '7.5rem',
+        'section-default': '5rem',
+        'section-sm': '2.5rem',
+        'gap-xs': '0.5rem',
+        'gap-md': '1.5rem',
+        'gap-lg': '2rem',
+        'gap-default': '3rem',
+        'gap-xxl': '4rem',
+        'gap-xxxl': '8rem',
+      },
+      maxWidth: {
+        '10col': '75.63rem',
+        '8col': '61.38rem',
+        '6col': '47rem',
+      },
+      borderRadius: {
+        'card': '0.625rem',
+        'pill': '80px',
+      },
+      transitionTimingFunction: {
+        'emons-hover': 'cubic-bezier(0.165, 0.84, 0.44, 1)',
+        'emons-morph': 'cubic-bezier(0.3, 0, 0.2, 1)',
+        'emons-alt': 'cubic-bezier(0.2, 0, 0.2, 1)',
+      },
+    },
+  },
+  plugins: [],
+}
