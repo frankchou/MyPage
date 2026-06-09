@@ -1,0 +1,154 @@
+{
+  "resume": {
+    "nav": ["Experience", "Skills", "Achievements", "About", "Contact"],
+    "subtitle": "Product Manager / Project Manager / Engineer",
+    "description": "7 years of product management and software engineering. Specialized in 0-to-1 product design, cross-border project management, and digital transformation. PMP, PMI-ACP, and PMI-PBA certified.",
+    "cta": "Explore My Ventures",
+    "aboutLabel": "Career highlights",
+    "aboutHeading": {
+      "seg1": "I am Frank Chou,",
+      "seg2": "a PM who codes.",
+      "seg3": "Specialized in 0-to-1 product design, cross-border project management, and full-stack development."
+    },
+    "aboutBody": "Over the past seven years, I have led cross-border teams across two countries and five departments. From building an AI-powered financial prediction system for the CEO's dashboard, to convincing reluctant teams across four countries to adopt a new project management platform, my work sits at the intersection of business strategy and hands-on engineering.",
+    "featuresH1": "Enterprise systems that move the needle.",
+    "featuresH2": "Built with code. Delivered with clarity.",
+    "videoText": "Where it all began.",
+    "cards": [
+      {
+        "number": "01",
+        "title": "Government EIP Platform.",
+        "items": [
+          "0-to-1 system architecture for SMESA",
+          "AI-accelerated requirements documentation",
+          "Encrypted auth under strict gov security policy",
+          "Client immediately commissioned follow-up projects"
+        ]
+      },
+      {
+        "number": "02",
+        "title": "SAP Data Integration.",
+        "items": [
+          "Standardized SAP data exchange protocols",
+          "20% reduction in system maintenance risk",
+          "60% improvement in cross-team integration efficiency",
+          "50% shorter development cycle for new system rollouts"
+        ]
+      },
+      {
+        "number": "03",
+        "title": "AI Financial Prediction.",
+        "items": [
+          "FP&A system became the CEO's primary decision-making source",
+          "Predicting 3-month production costs, ROI, and IRR",
+          "Reduced factory financial modeling time by 80%"
+        ]
+      },
+      {
+        "number": "04",
+        "title": "Global Project Management Hub.",
+        "items": [
+          "Integrated multi-country project data with Skype messaging",
+          "Convinced 50% of core teams to adopt through targeted rollout",
+          "Became the company's core PM system within one year",
+          "23 teams, 100+ projects, 15% efficiency improvement"
+        ]
+      },
+      {
+        "number": "05",
+        "title": "Smart Space Booking.",
+        "items": [
+          "Hackathon 3rd place, endorsed by CEO, rolled out company-wide",
+          "800 meeting rooms across 4 buildings, booking in under 1 minute",
+          "97% time savings vs. manual inspection process",
+          "Power BI analytics raised space utilization to 85%"
+        ]
+      }
+    ],
+    "learnMore": "Learn more"
+  },
+  "startup": {
+    "nav": ["Products", "Consulting", "About", "Story", "Contact"],
+    "subtitle": "Founder / Builder",
+    "description": "Explore a better everyday. Start here. Five AI-powered services plus custom enterprise consulting. From daily life to business operations, making everything simpler.",
+    "cta": "View My Experience",
+    "aboutLabel": "Why I build",
+    "aboutHeading": {
+      "seg1": "Every need",
+      "seg2": "deserves a better way.",
+      "seg3": "That is why I started building."
+    },
+    "aboutBody": "It started when former clients called me seven times, asking if I would start my own company to serve them. During that time, I had already been building products on the side, tools born from real frustrations in daily life. A job search coach, a home inventory tracker, a pet food safety scanner. Each one began as a problem I personally wanted solved. When people who used my products started coming back with new needs, I knew this was the path.",
+    "featuresH1": "Start here. Make everything simpler.",
+    "featuresH2": "AI services for life. Custom solutions for work.",
+    "videoText": "Your daily life, upgraded.",
+    "cards": [
+      {
+        "number": "01",
+        "title": "AI Hunter.",
+        "items": [
+          "Resume building with industry-best templates",
+          "Job matching by culture fit, not just keywords",
+          "Mock interviews and career path planning",
+          "One-stop career coaching from CV to offer"
+        ]
+      },
+      {
+        "number": "02",
+        "title": "FindIt Sprite.",
+        "items": [
+          "Snap a photo, know where everything is",
+          "Expiry reminders before things go to waste",
+          "Family sharing for household inventory"
+        ]
+      },
+      {
+        "number": "03",
+        "title": "DailyLumos.",
+        "items": [
+          "Daily scripture cards with AI-powered reflections",
+          "Original text and historical context included",
+          "A quiet moment of peace, one card at a time"
+        ]
+      },
+      {
+        "number": "04",
+        "title": "VocalCanvas.",
+        "items": [
+          "Text to speech with background music, an industry first",
+          "Adjustable speed control, an industry first",
+          "Meditation, bedtime stories, podcasts, any length"
+        ]
+      },
+      {
+        "number": "05",
+        "title": "PurePet.",
+        "items": [
+          "Snap a photo, instantly know if it is safe for your pet",
+          "One-tap pet store search for the best products",
+          "Pet owner community to share and learn together"
+        ]
+      },
+      {
+        "number": "06",
+        "title": "Smart Procurement & Container Optimizer.",
+        "items": [
+          "AI-predicted demand for the next 3 months",
+          "Auto-generated purchase orders, one click to approve",
+          "Weight-balanced container packing, minimized freight cost"
+        ]
+      },
+      {
+        "number": "07",
+        "title": "Your Problem, Solved.",
+        "items": [
+          "Custom system design for your business",
+          "From pain point to working solution",
+          "Have a challenge? Let's build it together."
+        ],
+        "ctaText": "Get in touch"
+      }
+    ],
+    "learnMore": "Learn more"
+  }
+}
